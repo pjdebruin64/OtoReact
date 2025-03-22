@@ -1,0 +1,32 @@
+
+####
+# To enable Server Side Includes:
+####
+# Options +Includes
+# AddType text/html .shtml
+# AddOutputFilter INCLUDES .shtml
+
+
+<IfModule mod_rewrite.c>
+   RewriteEngine On
+
+    # Make sure that / doesn't try to go to index.php without a rewrite :)
+    DirectoryIndex disabled
+
+    ####
+    # Deny access to certain directories that SHOULD NOT be exposed.
+    ####
+    RewriteRule ^cgi-bin/ - [L,R=403]
+
+    ####
+    # Redirect any non existing directory request (without a dot) to /index.html
+    ####
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule "(^|/)([^/.]*)$" index.shtml    [L]
+
+    ####
+    # Redirect any non existing file request (with a dot) to the base directory
+    ####
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule "(^|/)([^/]*\.[^/]*)$" "$2"            [L]
+</IfModule>
