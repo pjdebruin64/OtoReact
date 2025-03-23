@@ -15,11 +15,14 @@
     "TypeScript",
     "Reactivity"
   ],
-  "author": "P.J. de Bruin (peter@peterdebruin.net)",
+  "author": "Peter J. de Bruin (peter@peterdebruin.net)",
   "license": "SEE LICENSE IN README.md",
   "types": "./OtoReact.d.ts",
   "bugs": {
     "url": "https://github.com/pjdebruin64/OtoReact/issues"
   },
-  "homepage": "https://otoreact.dev/"
+  "homepage": "https://otoreact.dev/",
+  "devDependencies": {
+    "sed": "^0.0.2"
+  }
 }
