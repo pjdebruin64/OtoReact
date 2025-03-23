@@ -1,0 +1,25 @@
+{
+  "name": "otoreact",
+  "version": "1.0.0",
+  "description": "HTML-based framework for reactive web applications (SPA's)",
+  "main": "OtoReact.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pjdebruin64/OtoReact.git"
+  },
+  "keywords": [
+    "HTML",
+    "TypeScript",
+    "Reactivity"
+  ],
+  "author": "P.J. de Bruin (peter@peterdebruin.net)",
+  "license": "SEE LICENSE IN README.md",
+  "types": "./OtoReact.d.ts",
+  "bugs": {
+    "url": "https://github.com/pjdebruin64/OtoReact/issues"
+  },
+  "homepage": "https://otoreact.dev/"
+}
