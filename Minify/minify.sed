@@ -1,12 +1,17 @@
 # SED script to minify the TypeScript compiler output
 
+# Remove existing copyright notice
+:x
+/^\/\*.*\*\// d
+/^\/\*/ {N ; bx}
+
 # Insert copyright notice with date
 x
 s/.*/dir otoreact.ts/ ; e
 s/^.*(..)-(..)-(....).*/\/* OtoReact version \3-\2-\1/ ; p
 i\
 * Copyright 2022 Peter J. de Bruin (peter@peterdebruin.net)\
-* See https://otoreact.dev/download for license info\
+* SEE LICENSE IN README.md or https://otoreact.dev/download\
 */
 x
 

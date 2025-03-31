@@ -19,6 +19,15 @@
 			],
 			"group": "build",
 			"label": "tsc: watch - tsconfig.json"
+		},
+		{
+			"label": "sed minify OtoReact.js",
+			"type": "shell",
+			"command": "sed -bEi --file=Minify/minify.sed OtoReact.js; rm sed*",
+			"windows": {
+				"command": "Minify/bin/sed.exe -bEi --file=Minify\\minify.sed OtoReact.js;del sed*"
+			},
+			"group": "build",
 		}
 	]
 }

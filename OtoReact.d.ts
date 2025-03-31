@@ -1,4 +1,5 @@
 type booly = boolean | string | number | object | null | void;
+type falsy = false | '' | 0 | null | undefined;
 type ParentNode = HTMLElement | DocumentFragment;
 type Settings = Partial<{
     bTiming: boolean;
@@ -48,9 +49,8 @@ declare class Range<NodeType extends ChildNode = ChildNode> {
     Nodes(): Generator<ChildNode>;
     bD?: () => void;
     aD?: () => void;
-    upd?: number;
     rvars?: Set<RV>;
-    erase(par: false | Node): void;
+    erase(par: falsy | Node): void;
     uInfo?: {
         b: DOMBuilder;
         env: Environment;
@@ -69,9 +69,11 @@ export declare class RV<T = unknown> {
     $name?: string;
     $V: T;
     private $C;
+    private $upd;
     constructor(n: string, t?: T | Promise<T>);
     private $imm;
-    $subs: Set<Range<ChildNode> | Subscriber<T>>;
+    private $subs;
+    $subr: Set<Range<ChildNode>>;
     get V(): T;
     set V(v: T);
     Subscribe(s: Subscriber<T>, bImm?: boolean, cr?: boolean): this;
@@ -79,15 +81,15 @@ export declare class RV<T = unknown> {
     $SR({ pR, pN }: Area, b: DOMBuilder, r: Range, bR?: boolean): void;
     $UR(r: Range): void;
     get Set(): (t: T | Promise<T>) => void;
-    get Clear(): () => true;
+    get Clear(): () => undefined;
     get U(): T;
     set U(t: T);
     SetDirty(prev?: T): void;
-    Ex(): Promise<void>;
+    private ex;
     valueOf(): Object;
     toString(): string;
 }
-export type RVAR<T = any> = T extends [any] ? RV<T> & [T] : RV<T> & T;
+export type RVAR<T = any> = T extends [any] ? RV<T> & T : RV<T> & T;
 export declare function RVAR<T>(nm?: string, val?: T | Promise<T>, store?: Store, imm?: Subscriber<T>, storeNm?: string, updTo?: RV): RVAR<T>;
 type Subscriber<T = unknown> = ((t?: T, prev?: T) => unknown);
 type OES = {

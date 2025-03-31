@@ -58,15 +58,14 @@ class Context {
 class Range {
     constructor(a, n, text) {
         this.text = text;
-        this.n = n;
+        this.n = n ?? N;
         if (a) {
-            let { pR: p, prR: q } = a;
-            if (p && !p.n)
-                this.pR = p;
+            let { pR, prR: q } = a;
+            this.pR = pR;
             if (q)
                 q.nx = this;
-            else if (p)
-                p.ch = this;
+            else if (pR)
+                pR.ch = this;
             a.prR = this;
         }
     }
@@ -88,7 +87,8 @@ class Range {
             while (r = r.nx)
                 if (n = r.Fst)
                     return n;
-        } while (r = p);
+            r = p;
+        } while (r && !r.n);
     }
     get FstOrNxt() {
         return this.Fst || this.Nxt;
@@ -108,34 +108,34 @@ class Range {
         let { n, ch } = this;
         if (n && par) {
             par.removeChild(n);
-            par = N;
+            par = this.n = N;
         }
         this.ch = N;
         while (ch) {
             ch.bD?.call(ch.n || par);
-            ch.rvars?.forEach(rv => rv.$subs.delete(ch));
+            ch.rvars?.forEach(rv => rv.$subr.delete(ch));
             ch.erase(ch.pN ?? par);
             ch.aD?.call(ch.n || par);
+            ch.n = U;
             ch = ch.nx;
         }
     }
     async update() {
         let b, bR, pR;
-        if (this.upd < upd)
-            ({ env, oes, pN, b, bR, pR } = this.uInfo),
-                await b({ r: this, pN, pR }, bR);
+        ({ env, oes, pN, b, bR, pR } = this.uInfo),
+            await b({ r: this, pN, pR }, bR);
     }
 }
-const PrepRng = (a, srcE, text = Q, nWipe, res) => {
-    let { pN, r } = a, sub = { pN }, cr;
+const PrepRng = (ar, srcE, text = Q, nWipe, res) => {
+    let { pN, r } = ar, sub = { pN }, cr;
     if (cr = !r) {
-        sub.srcN = a.srcN;
-        sub.bfor = a.bfor;
-        r = sub.pR = new Range(a, N, srcE ? srcE.tagName + (text && ' ' + text) : text);
+        sub.srcN = ar.srcN;
+        sub.bfor = ar.bfor;
+        r = sub.pR = new Range(ar, N, srcE ? srcE.tagName + (text && ' ' + text) : text);
     }
     else {
         sub.r = r.ch || T;
-        a.r = r.nx || T;
+        ar.r = r.nx || T;
         if (cr = nWipe && (nWipe > 1 || res != r.res)) {
             (sub.pR = r).erase(pN);
             sub.r = N;
@@ -232,8 +232,10 @@ export class RV {
     constructor(n, t) {
         this.$V = U;
         this.$C = 0;
-        this.$imm = N;
-        this.$subs = new Set;
+        this.$upd = 0;
+        this.$imm = U;
+        this.$subs = U;
+        this.$subr = new Set;
         this.$name = n;
         if (t instanceof Promise)
             this.Set(t);
@@ -246,6 +248,7 @@ export class RV {
     }
     set V(v) {
         this.$C++;
+        this.$upd = upd;
         let p = this.$V;
         this.$V = v;
         v === p || this.SetDirty(p);
@@ -254,21 +257,21 @@ export class RV {
         if (s) {
             if (cr)
                 s(this.$V);
-            (bImm ? this.$imm || (this.$imm = new Set) : this.$subs).add(s);
+            (bImm ? this.$imm || (this.$imm = new Set) : this.$subs || (this.$subs = new Set)).add(s);
         }
         return this;
     }
     Unsubscribe(s) {
         this.$imm?.delete(s);
-        this.$subs.delete(s);
+        this.$subs?.delete(s);
     }
     $SR({ pR, pN }, b, r, bR = true) {
         r.uInfo || (r.uInfo = { b, env, oes, pN, pR, bR });
-        this.$subs.add(r);
+        this.$subr.add(r);
         (r.rvars || (r.rvars = new Set)).add(this);
     }
     $UR(r) {
-        this.$subs.delete(r);
+        this.$subr.delete(r);
         r.rvars.delete(this);
     }
     get Set() {
@@ -283,7 +286,10 @@ export class RV {
         };
     }
     get Clear() {
-        return () => Jobs.has(this) || (this.V = U);
+        return () => {
+            if (upd > this.$upd)
+                this.V = U;
+        };
     }
     get U() {
         ro ? AR(this) : this.SetDirty();
@@ -292,20 +298,18 @@ export class RV {
     set U(t) { this.$V = t; this.SetDirty(); }
     SetDirty(prev) {
         this.$imm?.forEach(s => s(this.$V, prev));
-        this.$subs.size && AJ(this);
-    }
-    async Ex() {
-        for (let subs of this.$subs)
-            try {
-                if (subs instanceof Range)
-                    await subs.update();
-                else
-                    subs(this.$V);
-            }
-            catch (e) {
-                console.log(e = 'ERROR: ' + Abbr(e, 1000));
-                alert(e);
-            }
+        this.$subr.forEach(AJ);
+        if (this.$subs)
+            AJ(this.ex || (this.ex = async () => {
+                for (let s of this.$subs)
+                    try {
+                        s(this.$V);
+                    }
+                    catch (e) {
+                        console.log(e = 'ERROR: ' + Abbr(e, 1000));
+                        alert(e);
+                    }
+            }));
     }
     valueOf() { return this.V?.valueOf(); }
     toString() { return this.V?.toString() ?? Q; }
@@ -359,7 +363,6 @@ const AR = (rv, bA) => arA
             arVars?.forEach((bA, rv) => arR.uv?.delete(rv) || rv.$SR(arA, arB, arR, !bA));
             arR.uv?.forEach((_, rv) => rv.$UR(arR));
             arR.uv = arVars;
-            arR.upd = upd;
         }
         arA = arVars = N;
     }
@@ -1265,7 +1268,7 @@ class RComp {
                     let iter = dOf() || E, { r, sub } = PrepRng(a, srcE, Q), sEnv = { env, oes }, u = r.u = r.u + 1 || 0;
                     ;
                     if (iter instanceof Promise)
-                        iter.then(it => AJ({ Ex: () => r.u == u && updFor(it) }), sEnv.oes.e);
+                        iter.then(it => AJ(() => r.u == u && updFor(it)), sEnv.oes.e);
                     else
                         await updFor(iter);
                     async function updFor(iter) {
@@ -1299,7 +1302,7 @@ class RComp {
                                     kMap.delete(k);
                                 nxR.erase(pN);
                                 if (nxR.rv)
-                                    nxR.rv.$subs.delete(nxR);
+                                    nxR.rv.$subr.delete(nxR);
                                 nxR.pv = N;
                                 nxR = nxR.nx;
                             }
@@ -1366,7 +1369,7 @@ class RComp {
                                 vNx(nxIR.value?.item);
                                 if (cr || !hash || hash.some((h, i) => h != chR.hash[i]))
                                     rv ?
-                                        AJ(rv)
+                                        rv.U
                                         :
                                             await b(iSub);
                             }
@@ -1649,7 +1652,7 @@ class RComp {
                         : () => {
                             let s = Q, x;
                             for (let g of gens)
-                                s += typeof g == 'string' ? g : (x = g.d(), (g.f ? x?.$fmt(g.f()) : x?.toString()) ?? Q);
+                                s += typeof g == 'string' ? g : (x = g.d(), (g.f ? x?.$F(g.f()) : x?.toString()) ?? Q);
                             return s;
                         };
                 gens.push({
@@ -1860,7 +1863,7 @@ export async function RFetch(req, init) {
     }
 }
 const fmt = new Intl.DateTimeFormat('nl', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3, hour12: false }), reg1 = /(?<dd>0?(?<d>\d+))-(?<MM>0?(?<M>\d+))-(?<yyyy>2.(?<yy>..))\D+(?<HH>0?(?<H>\d+)):(?<mm>0?(?<m>\d+)):(?<ss>0?(?<s>\d+)),(?<fff>(?<ff>(?<f>.).).)/g;
-Number.prototype.$fmt = function (fm) {
+Number.prototype.$F = function (fm) {
     let d = oes.t.dN, FM = d[fm];
     if (!FM) {
         let m = /^([CDFXN]?)(\d*)(\.(\d*)(-(\d*))?)?$/.exec(tU(fm)) || thro(`Invalid number format '${fm}'`), n = pI(m[2]), p = pI(m[4]), q = pI(m[6]) ?? p, o = { ...oes.t };
@@ -1896,18 +1899,18 @@ Number.prototype.$fmt = function (fm) {
     }
     return FM.format(this);
 };
-Date.prototype.$fmt = function (f) {
+Date.prototype.$F = function (f) {
     f || (f = "yyyy-MM-dd HH:mm:ss");
     return fmt.format(this).replace(reg1, f.replace(/\\(.)|(yy|[MdHms])\2{0,1}|f{1,3}/g, (m, a) => a || `$<${m}>`));
 };
-String.prototype.$fmt = function (f) {
+String.prototype.$F = function (f) {
     let w = parseInt(f), L = Math.abs(w) - this.length;
     return L > 0 ?
         w > 0 ? ' '.repeat(L) + this : this + ' '.repeat(L)
         : this;
 };
-Boolean.prototype.$fmt = function (f) {
-    return f.split(':')?.[this ? 0 : 1];
+Boolean.prototype.$F = function (f) {
+    return f.split(';')?.[this ? 0 : 1];
 };
 class DL extends RV {
     constructor() {
@@ -1971,12 +1974,11 @@ export async function RCompile(srcN, setts) {
             srcN.innerHTML = Q;
             for (let a of srcN.attributes)
                 a.value = Q;
-            AJ({ Ex: () => C.Build({
-                    pN: srcN.parentElement,
-                    srcN,
-                    bfor: srcN
-                }).then(ScH).finally(() => srcN.hidden = F)
-            });
+            AJ(() => C.Build({
+                pN: srcN.parentElement,
+                srcN,
+                bfor: srcN
+            }).then(ScH).finally(() => srcN.hidden = F));
         }
         catch (e) {
             alert('OtoReact compile error: ' + Abbr(e, 1000));
@@ -1989,14 +1991,22 @@ export async function DoUpdate() {
         let u0 = upd;
         start = now();
         while (Jobs.size) {
-            let J = Jobs;
-            Jobs = new Set;
             if (upd++ - u0 > 25) {
                 alert('Infinite react-loop');
                 break;
             }
+            let J = Jobs, C = new WeakSet, check = async (r) => {
+                if (r && !C.has(r)) {
+                    await check(r.pR);
+                    if (J.has(r) && r.n !== U)
+                        await r.update();
+                    C.add(r);
+                }
+                ;
+            };
+            Jobs = new Set;
             for (let j of J)
-                await j.Ex();
+                await (j instanceof Range ? check(j) : await j());
         }
         if (nodeCnt)
             R?.log(`Updated ${nodeCnt} nodes in ${(now() - start).toFixed(1)} ms`);

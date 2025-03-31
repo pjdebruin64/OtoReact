@@ -49,7 +49,8 @@ const
 ,   pI = (s: string) => s ? parseInt(s) : N
 ,   tU = (s:string) => s.toUpperCase()
     // AddEventListener
-,   EL = (et: EventTarget, k: string, el: EventListenerOrEventListenerObject) => et.addEventListener(k, el)
+,   EL = (et: EventTarget, k: string, el: EventListenerOrEventListenerObject) =>
+        et.addEventListener(k, el)
 
     // Default settings 
 ,   dflts: Settings = {
@@ -81,6 +82,7 @@ const
 
 // Type used for truthy / falsy values
 type booly = boolean|string|number|object|null|void;
+type falsy = false | '' | 0 | null | undefined;
 // Nodes that can have children
 type ParentNode = HTMLElement|DocumentFragment;
 
@@ -235,31 +237,32 @@ type AreaR<RT extends object = {}> = Area<RT, never>;
     It is created by a builder, and contains all metadata needed for updating or destroying the DOM.
 */
 class Range<NodeType extends ChildNode = ChildNode>{
-    n: NodeType;     // Optional DOM node, in case this range corresponds to a single node
+    n: NodeType;     // Optional DOM node, in case this range represents a (single) DOM node
+                    // null when no DOMnode, undefined when destroyed
     
     ch: Range;         // Linked list of child ranges (null=empty)
     nx: Range;         // Next range in linked list
 
-    pR?: Range;       // Parent range, only when both belong to the SAME DOM node
+    pR?: Range;       // Parent range
     pN?: false | ParentNode;        // Parent node, only when this range has a DIFFERENT parent node than its parent range
 
     constructor(
         a: Area             // The constructor puts the new Range into this Area
-    ,   n?: NodeType        // Optional DOM node
+    ,   n: NodeType         // Optional DOM node
     ,   public text?: string  // Description, used only for comments
     ) {
-        this.n = n;
+        this.n = n ?? N;
         if (a) {
-            let {pR: p, prR: q} = a;
-            if (p && !p.n)
-                // Set the parent range, only when that range isn't a DOM node
-                this.pR = p;
+            let {pR, prR: q} = a;
+            //if (p && !p.n)
+            // Set the parent range
+            this.pR = pR;
             
             // Insert this range in a linked list, as indicated by 'a'
             if (q) 
                 q.nx = this;
-            else if (p)
-                p.ch = this;
+            else if (pR)
+                pR.ch = this;
         
             // Update the area, so the new range becomes its previous range
             a.prR = this;
@@ -290,7 +293,8 @@ class Range<NodeType extends ChildNode = ChildNode>{
             p = r.pR;
             while (r = r.nx)
                 if (n = r.Fst) return n;
-        } while (r = p)
+            r = p;
+        } while (r && !r.n)
     }
 
     public get FstOrNxt() {
@@ -313,7 +317,6 @@ class Range<NodeType extends ChildNode = ChildNode>{
 
     bD?: () => void;   // Before destroy handler
     aD?: () => void;   // After destroy handler
-    upd?: number;   // Update stamp
 
     // For reactive elements
     rvars?: Set<RV>;         // RVARs on which the element reacts
@@ -321,12 +324,12 @@ class Range<NodeType extends ChildNode = ChildNode>{
     // Erase the range, i.e., destroy all child ranges, remove all nodes, unsubscribe from all RVARs, and call all before- and after-destroy handlers.
     // The range itself remains a child of its parent range.
     // The parent node must be specified, or a falsy value when nodes need not be removed.
-    erase(par: false | Node) {
+    erase(par: falsy | Node) {
         let {n, ch} = this;
         if (n && par) {
             // Remove the current node, only when 'par' is specified
             par.removeChild(n);
-            par = N; // No need to remove child nodes of this node
+            par = this.n = N; // No need to remove child nodes of this node
         }
         this.ch = N;
         while (ch) {
@@ -335,7 +338,7 @@ class Range<NodeType extends ChildNode = ChildNode>{
 
             // Remove range ch from any RVAR it is subscribed to
             ch.rvars?.forEach(rv =>
-                rv.$subs.delete(ch));
+                rv.$subr.delete(ch));
 
             // Destroy 'ch'
             ch.erase(ch.pN ?? par);
@@ -343,6 +346,7 @@ class Range<NodeType extends ChildNode = ChildNode>{
             // Call an 'afterdestroy' handler
             ch.aD?.call(ch.n || par);
 
+            ch.n = U;
             ch = ch.nx;
         }
     }
@@ -351,8 +355,6 @@ class Range<NodeType extends ChildNode = ChildNode>{
 
     async update() {
         let b: DOMBuilder, bR: boolean, pR: Range;
-        
-        if (this.upd < upd)
             ({env, oes, pN, b, bR, pR} = this.uInfo),
             await b({r: this, pN, pR}, bR);
     }
@@ -365,7 +367,7 @@ class Range<NodeType extends ChildNode = ChildNode>{
     and on updating it can optionally erase the range, either when the result value has changed or always.
 */
 const PrepRng = <RT extends object>(
-    a: Area            // Given area
+    ar: Area            // Given area
 ,   srcE?: HTMLElement  // Source element, just for error messages
 ,   text: string = Q    // Optional text for error messages
 ,   nWipe?: 1|2         // 1=erase 'a.r' when 'res' has changed; 2=erase always
@@ -376,21 +378,22 @@ const PrepRng = <RT extends object>(
     cr: booly           // True when the sub-range has to be created
 } =>
 {
-    let {pN, r} = a as AreaR<{res?: unknown}>
+    // ar.r should never be ==true
+    let {pN, r} = ar as AreaR<{res?: unknown}>
     ,   sub: Area = {pN}
     ,   cr: boolean
     ;
     if (cr = !r) {
-        sub.srcN = a.srcN;
-        sub.bfor = a.bfor;
+        sub.srcN = ar.srcN;
+        sub.bfor = ar.bfor;
         
-        r = sub.pR = new Range(a, N
+        r = sub.pR = new Range(ar, N
             , srcE ? srcE.tagName + (text && ' ' + text) : text
             );
     }
     else {
         sub.r = r.ch || T;
-        a.r = r.nx || T;
+        ar.r = r.nx || T;
 
         if (cr = nWipe && (nWipe>1 || res != r.res)) {
             (sub.pR = r).erase(pN); 
@@ -585,6 +588,7 @@ export class RV<T = unknown> {
     // The value of the variable
     $V: T = U;
     private $C: number = 0;
+    private $upd: number = 0;
 
     constructor(n: string, t?: T | Promise<T>) {
         this.$name = n;
@@ -594,9 +598,10 @@ export class RV<T = unknown> {
             this.$V = t;
     }
     // Immediate subscribers
-    private $imm: Set<Subscriber<T>> = N;
+    private $imm: Set<Subscriber<T>> = U; // Init is necessary
     // Deferred subscribers
-    public $subs = new Set<Subscriber<T> | Range>;
+    public $subs: Set<Subscriber<T>> = U;
+    public $subr = new Set<Range>;
 
     // Use var.V to get or set its value
     get V(): T {
@@ -606,7 +611,7 @@ export class RV<T = unknown> {
      }
     // When setting, it will be marked dirty.
     set V(v: T) {
-        this.$C++;
+        this.$C++; this.$upd = upd;
         let p = this.$V;
         this.$V = v;
         v === p || this.SetDirty(p);
@@ -620,26 +625,26 @@ export class RV<T = unknown> {
         if (s) {
             if (cr)
                 s(this.$V);
-            (bImm ? this.$imm ||= new Set<Subscriber<T>>
-                : this.$subs).add(s);
+            (bImm ? this.$imm ||= new Set
+                : this.$subs ||= new Set).add(s);
         }
         return this;
     }
     Unsubscribe(s: Subscriber<T>) {
         this.$imm?.delete(s);
-        this.$subs.delete(s);
+        this.$subs?.delete(s);
     }
     // Subscribe range
     // bR = true means update just the root node, not the whole tree
     $SR({pR, pN}: Area, b: DOMBuilder, r: Range, bR:boolean = true) {
         // Keep all info needed for the update in r.uInfo
         r.uInfo ||= {b, env, oes, pN, pR, bR};
-        this.$subs.add(r);
+        this.$subr.add(r);
         (r.rvars ||= new Set).add(this);
     }
     // Unsubscribe range
     $UR(r: Range) {
-        this.$subs.delete(r);
+        this.$subr.delete(r);
         r.rvars.delete(this);
     }
     get Set() : (t:T | Promise<T>) => void
@@ -657,8 +662,11 @@ export class RV<T = unknown> {
         }
     }
     get Clear() {
-        return () => 
-            Jobs.has(this) || (this.V=U);
+        return () => {
+            // Clear this RV, _unlesss_ it was set in the current event cycle
+            if (upd > this.$upd)
+                this.V=U;
+        }
     }
     // Use var.U to get its value for the purpose of updating some part of it.
     // It will be marked dirty.
@@ -672,22 +680,18 @@ export class RV<T = unknown> {
     public SetDirty(prev?: T) {
         this.$imm?.forEach(s => s(this.$V, prev));
 
-        this.$subs.size && AJ(this);
-    }
-
-    public async Ex() {
-        for (let subs of this.$subs)
-            try { 
-                if (subs instanceof Range)
-                    await subs.update();
-                else
-                    subs(this.$V);
-            }
+        this.$subr.forEach(AJ);
+        if (this.$subs)
+            AJ(this.ex ||= async () => {
+                for (let s of this.$subs)
+                    try { s(this.$V); }
             catch (e) {    
                 console.log(e = 'ERROR: ' + Abbr(e,1000));
                 alert(e);
             }
+            });
     }
+    private ex: Job;
 
     valueOf()  { return this.V?.valueOf(); }
     toString() { return this.V?.toString() ?? Q; }
@@ -701,7 +705,7 @@ export type RVAR<T = any> = // RV<T> & T
         // when  T is a distributive type like boolean and one tries to assign to rvar.V.
         
         // Workaround (see https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types):
-        T extends [any] ? RV<T> & [T] : RV<T> & T
+        T extends [any] ? RV<T> & T : RV<T> & T
         ;
 
 const
@@ -711,7 +715,6 @@ const
     ProxH: ProxyHandler<RV<object>> = 
     {
         get(rv: RV, p) {
-            //return (p in rv ? rv : rv.V)?.[p];
             if (p in rv) return rv[p];
 
             let
@@ -787,12 +790,12 @@ export function RVAR<T>(
 // because no two updating routines may run in parallel.
 type Subscriber<T = unknown> = 
       ((t?: T, prev?: T) => unknown);
+type Job<T = unknown> = Subscriber<T> | Range;
 
 //#endregion
 
 //#region Runtime data and utilities
 type OES = {e: EventListener, s: EventListener, t:Settings};     // Holder for onerror and onsuccess handlers
-type Job = {Ex: () => Promise<unknown> }
 
 // Runtime data. All OtoReact DOM updates run synchronously, so the its current state ca
 let env: Environment       // Current runtime environment
@@ -850,7 +853,6 @@ const
                 );
                 arR.uv?.forEach((_,rv) => rv.$UR(arR) );
                 arR.uv = arVars;
-                arR.upd = upd;
             }
             arA = arVars = N;
         }
@@ -922,14 +924,13 @@ type ModifierData = { [k: number]: any};
 // Object to supply DOM event handlers with error handling and 'this' binding.
 // It allows the handler and onerror handlers to be updated without creating a new closure
 // and without replacing the target element event listener.
-class Hndlr {
+class Hndlr implements EventListenerObject {
     oes: OES;       // onerror and onsuccess handler
     h: EventListener;     // User-defined handler
 
     constructor() {
         this.oes = oes;
     }
-
 
     handleEvent(ev: Event, ...r: any[]) {
             if (this.h)
@@ -951,7 +952,7 @@ class Hndlr {
                 } 
     }
 }
-class Targ {
+class Targ implements EventListenerObject {
     constructor(public nm?: string) {}
 
     c?: string;
@@ -1315,15 +1316,7 @@ class RComp {
     private LVars(varlist: string): Array<LVar> {
         return Array.from(split(varlist), nm => this.LV(nm));
     }
-/*
-    public LRV<T>(nm: string, ...r: any[]) : (t:T) => void {
-        let lv = this.LV<RV<T>>(nm)
-        ,   gv = this.CT.getV<RV<T>>(this.CT.lvM.get(lv.nm))
-        if (lv)
-            return (t:T) => 
-                (gv() || lv(RVAR(U,U,U,...r))).V = t;
-    }
-*/
+    
     // At compiletime, declare a number of local constructs, according to the supplied signatures.
     // Returns a single routine to set them all at once.
     private LCons(listS: Iterable<Signat>) {
@@ -2509,7 +2502,7 @@ class RComp {
                     ;                            
                     if (iter instanceof Promise)
                         // The iteration is a Promise, so we can't execute the FOR just now, and we don't want to wait for it.                        
-                        iter.then(it => AJ({Ex: () => r.u == u && updFor(it)}) , sEnv.oes.e);
+                        iter.then(it => AJ(() => r.u == u && updFor(it)) , sEnv.oes.e);
                     else
                         await updFor(iter);
 
@@ -2579,7 +2572,7 @@ class RComp {
                                         kMap.delete(k);
                                     nxR.erase(pN);
                                     if (nxR.rv)
-                                        nxR.rv.$subs.delete(nxR);
+                                        nxR.rv.$subr.delete(nxR);
                                     nxR.pv = N;
                                     nxR = nxR.nx;
                                 }
@@ -2685,7 +2678,7 @@ class RComp {
                                 )
                                     rv ? // I.e. when !cr && bRe
                                         // Then set the RVAR dirty
-                                        AJ(rv)
+                                        rv.U
                                     :
                                         // Else build
                                         await b(iSub);
@@ -3212,7 +3205,7 @@ class RComp {
                         : () => {
                             let s = Q, x: any;
                             for (let g of gens)
-                                s+= typeof g == 'string' ? g : (x = g.d(),(g.f ? x?.$fmt(g.f()) : x?.toString()) ?? Q)
+                                s+= typeof g == 'string' ? g : (x = g.d(),(g.f ? x?.$F(g.f()) : x?.toString()) ?? Q)
                             return s;
                         };
                 
@@ -3601,7 +3594,7 @@ const
     { day:'2-digit', month: '2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', second: '2-digit', fractionalSecondDigits:3, hour12:false }),
     reg1 = /(?<dd>0?(?<d>\d+))-(?<MM>0?(?<M>\d+))-(?<yyyy>2.(?<yy>..))\D+(?<HH>0?(?<H>\d+)):(?<mm>0?(?<m>\d+)):(?<ss>0?(?<s>\d+)),(?<fff>(?<ff>(?<f>.).).)/g;
 
-(Number.prototype as any).$fmt = function(this: number, fm: string)  {
+(Number.prototype as any).$F = function(this: number, fm: string)  {
     let d: { [f:string]: Intl.NumberFormat } = oes.t.dN
         , FM: Intl.NumberFormat = d[fm];
     if (!FM) {
@@ -3636,7 +3629,7 @@ const
     return FM.format(this);
 };
 
-(Date.prototype as any).$fmt = function(this: Date, f: string) {
+(Date.prototype as any).$F = function(this: Date, f: string) {
     f ||= "yyyy-MM-dd HH:mm:ss";
   return fmt.format(this).replace(reg1, f.replace( 
         /\\(.)|(yy|[MdHms])\2{0,1}|f{1,3}/g, (m,a) => a || `$<${m}>`
@@ -3644,15 +3637,15 @@ const
     );
 };
 
-(String.prototype as any).$fmt = function(this: string, f: string) : string {
+(String.prototype as any).$F = function(this: string, f: string) : string {
     let w = parseInt(f), L = Math.abs(w) - this.length;
     return L > 0 ?
         w > 0 ? ' '.repeat(L) + this : this + ' '.repeat(L)
         : this;
 } as any;
 
-(Boolean.prototype as any).$fmt = function(this: boolean, f: string): string{
-    return f.split(':')?.[this ? 0 : 1];
+(Boolean.prototype as any).$F = function(this: boolean, f: string): string{
+    return f.split(';')?.[this ? 0 : 1];
 }
 //#endregion
 
@@ -3757,13 +3750,13 @@ export async function RCompile(srcN: HTMLElement & {b?: booly}, setts?: string |
             for (let a of srcN.attributes) a.value=Q;
             
             // Initial build
-            AJ({Ex: () =>
+            AJ(() =>
                 C.Build({
                     pN: srcN.parentElement,
                     srcN,           // When srcN is a non-RHTML node (like <BODY>), then it will remain and will receive childnodes and attributes
                     bfor: srcN      // When it is an RHTML-construct, then new content will be inserted before it
                 }).then(ScH).finally(() => srcN.hidden = F)
-            });
+            );
         }
         catch (e) {    
             alert('OtoReact compile error: '+Abbr(e, 1000));
@@ -3777,13 +3770,24 @@ export async function DoUpdate() {
         let u0 = upd;
         start = now();
         while (Jobs.size) {
-            let J = Jobs;
-            Jobs = new Set;
-            //if (upd++ - u0 > 15) debugger
             if (upd++ - u0 > 25)
             { alert('Infinite react-loop'); break; }
+            
+            let J = Jobs,
+                C = new WeakSet<Range>,
+                check = async (r:Range) => {
+                    if (r && !C.has(r)) {
+                        // Make sure parent ranges are always updated before their children
+                        await check(r.pR);
+                        if (J.has(r) && r.n !== U)
+                            await r.update();
+                        C.add(r);
+                    };
+                };
+
+            Jobs = new Set;
             for (let j of J)
-                await j.Ex();
+                await (j instanceof Range ? check(j) : await j());
         }
         if (nodeCnt)
             R?.log(`Updated ${nodeCnt} nodes in ${(now() - start).toFixed(1)} ms`);
