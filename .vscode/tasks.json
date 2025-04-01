@@ -2,30 +2,40 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
+			"label": "tsc: build - tsconfig.json",
 			"type": "typescript",
 			"tsconfig": "tsconfig.json",
 			"problemMatcher": [
 				"$tsc"
 			],
-			"group": "build",
-			"label": "tsc: build - tsconfig.json"
+			"group": "build"
 		},
 		{
+			"label": "tsc: watch - tsconfig.json",
 			"type": "typescript",
 			"tsconfig": "tsconfig.json",
 			"option": "watch",
 			"problemMatcher": [
 				"$tsc-watch"
 			],
-			"group": "build",
-			"label": "tsc: watch - tsconfig.json"
+			"group": "build"
 		},
 		{
-			"label": "sed minify OtoReact.js",
+			"label": "Minify OtoReact.js",
 			"type": "shell",
 			"command": "sed -bEi --file=Minify/minify.sed OtoReact.js; rm sed*",
 			"windows": {
 				"command": "Minify/bin/sed.exe -bEi --file=Minify\\minify.sed OtoReact.js;del sed*"
+			},
+			"group": "build",
+		},
+
+		{
+			"label": "Minify and publish",
+			"type": "shell",
+			"command": "sed -bEi --file=Minify/minify.sed OtoReact.js; rm sed*;npm publish",
+			"windows": {
+				"command": "Minify/bin/sed.exe -bEi --file=Minify\\minify.sed OtoReact.js;del sed*;npm publish"
 			},
 			"group": "build",
 		}

@@ -41,7 +41,7 @@ declare class Range<NodeType extends ChildNode = ChildNode> {
     nx: Range;
     pR?: Range;
     pN?: false | ParentNode;
-    constructor(a: Area, n?: NodeType, text?: string);
+    constructor(a: Area, n: NodeType, text?: string);
     toString(): string;
     get Fst(): ChildNode;
     get Nxt(): ChildNode;
@@ -72,7 +72,7 @@ export declare class RV<T = unknown> {
     private $upd;
     constructor(n: string, t?: T | Promise<T>);
     private $imm;
-    private $subs;
+    $subs: Set<Subscriber<T>>;
     $subr: Set<Range<ChildNode>>;
     get V(): T;
     set V(v: T);
@@ -81,7 +81,7 @@ export declare class RV<T = unknown> {
     $SR({ pR, pN }: Area, b: DOMBuilder, r: Range, bR?: boolean): void;
     $UR(r: Range): void;
     get Set(): (t: T | Promise<T>) => void;
-    get Clear(): () => undefined;
+    get Clear(): () => void;
     get U(): T;
     set U(t: T);
     SetDirty(prev?: T): void;

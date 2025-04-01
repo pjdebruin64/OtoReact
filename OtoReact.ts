@@ -1,8 +1,8 @@
-/* The OtoReact framework
+/* The OtoReact framework 
 * Copyright 2022 Peter J. de Bruin (peter@peterdebruin.net)
 * See https://otoreact.dev/
 */
-const
+const 
     // Some abbreviations
     // Please forgive me for trying to minimize the library file size
     N = <null> null

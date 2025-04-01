@@ -1,6 +1,6 @@
 {
   "name": "otoreact",
-  "version": "1.0.1",
+  "version": "1.0.4",
   "description": "HTML-based framework for reactive web applications (SPA's)",
   "main": "OtoReact.js",
   "scripts": {
