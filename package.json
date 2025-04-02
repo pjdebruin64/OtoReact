@@ -1,11 +1,17 @@
 {
   "name": "otoreact",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "HTML-based framework for reactive web applications (SPA's)",
-  "main": "OtoReact.js",
+  "browser": "OtoReact.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "files": [
+    "OtoReact.js",
+    "OtoReact.d.ts",
+    "OtoLib.html",
+    "RoutingConfig"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/pjdebruin64/OtoReact.git"

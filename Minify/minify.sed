@@ -15,15 +15,15 @@ i\
 */
 x
 
-: start
+: loop
 
 # Remove CR's
 s/\r//
 
 # Merge lines ending in these characters (without semicolon) with next line, inserting a space
-/[][,{}=:?(&|];?$|else$/ {N ; s/\n */ / ; b start }
+/[][,{}=:?()&|]$|else$/ {N ; s/\n */ / ; b loop }
 # Merge line ending in backslash with next line, removing the backslash
-/\\$/ {N ; s/\\\n// ; b start }
+/\\$/ {N ; s/\\\n// ; b loop }
 
 # Remove semicolons at end of line
 s/;+$//
@@ -40,21 +40,21 @@ t repeat    # Needed to clear previous test result
 s/^(([^`]|`[^`]*`)*`[^`]*\$\{('(\\.|[^\'])*'|\"(\\.|[^\"])*\"|\{[^{}]*\}|[^{}])*)(([-+*/&|?:]) +| +([-+*/&|?:]))/\1\7\8/i
 t repeat
 
-# Remove comma and semicolon before ] or } or ), but not within ",]+`"
-# s/(,\]+`)|[,;]+([]})])/\1\2/g
+# Remove semicolon before }
+# s/;+([}])/\1/g
 
 # Skip emptylines
-/^$/{n;b start} 
+/^$/{n;b loop} 
 
 # Check next line
 N
 # If it starts with one of these chars, then merge
-/\n\s*[\}\?:&|]/{ s/\n\s*// ; b start }
+/\n\s*[\}\?:&|]/{ s/\n\s*// ; b loop }
 
-# If it starts with ( or [, then merge and (re-)insert semicolon, to prevent unintentional function calls
-/\n\s*([[(])/{ s/\n\s*/;/ ; b start }
+# If it starts with ( or [ or class, then merge and (re-)insert semicolon, to prevent unintentional function calls
+/\n\s*([[(]|class)/{ s/\n\s*/;/ ; b loop }
 
 # Otherwise print up to newline, and restart with the remaining (next) line
 P
 s/^.*\n//
-b start
+b loop

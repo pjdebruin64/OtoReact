@@ -1,5 +1,0 @@
-*.tsbuildinfo
-.vscode
-/Minify
-*.ts
-/*.bat

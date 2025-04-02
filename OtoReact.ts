@@ -219,13 +219,13 @@ type Area<RT extends object = {}, T extends true = true> = {
     // When falsy (undefined or null), the DOM has to be CREATED
     // When truthy (a Range or true), the DOM has to be UPDATED
 
-    pN: ParentNode;            // DOM parent node
+    PN: ParentNode;            // DOM parent node
     bfor?: ChildNode;     // DOM node before which new nodes are to be inserted
 
     /* When !r, i.e. when the DOM has to be created: */
     srcN?: ChildNode;     // Optional source node to be replaced by the new DOM 
-    pR?: Range;         // The new range shall either be the first child this parent range,
-    prR?: Range;        // Or the next sibling of this previous range
+    PR?: Range;         // The new range shall either be the first child this parent range,
+    pR?: Range;        // Or the next sibling of this previous range
 }
 
 /* An 'AreaR' is an Area 'a' where 'a.r' is a 'Range' or 'null', not just 'true' */
@@ -243,29 +243,29 @@ class Range<NodeType extends ChildNode = ChildNode>{
     ch: Range;         // Linked list of child ranges (null=empty)
     nx: Range;         // Next range in linked list
 
-    pR?: Range;       // Parent range
-    pN?: false | ParentNode;        // Parent node, only when this range has a DIFFERENT parent node than its parent range
+    PR?: Range;       // Parent range
+    PN?: false | ParentNode;        // Parent node, only when this range has a DIFFERENT parent node than its parent range
 
     constructor(
-        a: Area             // The constructor puts the new Range into this Area
+        ar: Area             // The constructor puts the new Range into this Area
     ,   n: NodeType         // Optional DOM node
     ,   public text?: string  // Description, used only for comments
     ) {
         this.n = n ?? N;
-        if (a) {
-            let {pR, prR: q} = a;
+        if (ar) {
+            let {PR, pR} = ar;
             //if (p && !p.n)
             // Set the parent range
-            this.pR = pR;
+            this.PR = PR;
             
             // Insert this range in a linked list, as indicated by 'a'
-            if (q) 
-                q.nx = this;
-            else if (pR)
-                pR.ch = this;
+            if (pR) 
+                pR.nx = this;
+            else if (PR)
+                PR.ch = this;
         
             // Update the area, so the new range becomes its previous range
-            a.prR = this;
+            ar.pR = this;
         }
     }
 
@@ -273,7 +273,7 @@ class Range<NodeType extends ChildNode = ChildNode>{
 
     // Get first childnode IN the range
     public get Fst(): ChildNode {
-        if (this.pN == N) {
+        if (this.PN == N) {
             let {n, ch} = <Range>this;
             while (!n && ch) {
                 n = ch.Fst;
@@ -290,7 +290,7 @@ class Range<NodeType extends ChildNode = ChildNode>{
         ,   p: Range
         ;
         do {
-            p = r.pR;
+            p = r.PR;
             while (r = r.nx)
                 if (n = r.Fst) return n;
             r = p;
@@ -341,7 +341,7 @@ class Range<NodeType extends ChildNode = ChildNode>{
                 rv.$subr.delete(ch));
 
             // Destroy 'ch'
-            ch.erase(ch.pN ?? par);
+            ch.erase(ch.PN ?? par);
 
             // Call an 'afterdestroy' handler
             ch.aD?.call(ch.n || par);
@@ -350,13 +350,13 @@ class Range<NodeType extends ChildNode = ChildNode>{
             ch = ch.nx;
         }
     }
-    // info how to update this range, when it is used as a subscriber
-    uInfo?: {b: DOMBuilder, env: Environment, oes: OES, pN: ParentNode, pR: Range, bR: boolean};
-
-    async update() {
-        let b: DOMBuilder, bR: boolean, pR: Range;
-            ({env, oes, pN, b, bR, pR} = this.uInfo),
-            await b({r: this, pN, pR}, bR);
+    // info how to update this range, when it is used as a Job
+    uInfo?: {b: DOMBuilder, env: Environment, oes: OES, PN: ParentNode, PR: Range, bR: boolean};
+    // Do the update
+    update() {
+        let b: DOMBuilder, bR: boolean, PR: Range;
+        ({b, bR, PR, env, oes, PN} = this.uInfo);
+        return b({r: this, PN, PR}, bR);
     }
 }
 /* The following function prepares a sub area of a given 'area', 
@@ -379,15 +379,15 @@ const PrepRng = <RT extends object>(
 } =>
 {
     // ar.r should never be ==true
-    let {pN, r} = ar as AreaR<{res?: unknown}>
-    ,   sub: Area = {pN}
+    let {PN, r} = ar as AreaR<{res?: unknown}>
+    ,   sub: Area = {PN}
     ,   cr: boolean
     ;
     if (cr = !r) {
         sub.srcN = ar.srcN;
         sub.bfor = ar.bfor;
         
-        r = sub.pR = new Range(ar, N
+        r = sub.PR = new Range(ar, N
             , srcE ? srcE.tagName + (text && ' ' + text) : text
             );
     }
@@ -396,7 +396,7 @@ const PrepRng = <RT extends object>(
         ar.r = r.nx || T;
 
         if (cr = nWipe && (nWipe>1 || res != r.res)) {
-            (sub.pR = r).erase(pN); 
+            (sub.PR = r).erase(PN); 
             sub.r = N;
             sub.bfor = r.Nxt;
         }
@@ -422,7 +422,7 @@ const PrepRng = <RT extends object>(
     if (cr)
         r = new Range(a,
                 a.srcN
-                || a.pN.insertBefore<HTMLElement>(D.createElement(tag), a.bfor)
+                || a.PN.insertBefore<HTMLElement>(D.createElement(tag), a.bfor)
             ) as Range<HTMLElement> & RT;
     else
         a.r = r.nx || T;
@@ -431,10 +431,10 @@ const PrepRng = <RT extends object>(
     return { 
         r, 
         sub: {
-            pN: pN = r.n, 
+            PN: PN = r.n, 
             r: r.ch, 
             bfor: N,
-            pR: r
+            PR: r
         },
         cr
     };
@@ -452,7 +452,7 @@ const PrepRng = <RT extends object>(
         let r = a.r as Range<CharacterData>;
         if (!r)
             r = new Range(a,
-                pN.insertBefore(
+                PN.insertBefore(
                     bC ? D.createComment(data) : D.createTextNode(data)
                     , a.bfor)
             );
@@ -636,9 +636,9 @@ export class RV<T = unknown> {
     }
     // Subscribe range
     // bR = true means update just the root node, not the whole tree
-    $SR({pR, pN}: Area, b: DOMBuilder, r: Range, bR:boolean = true) {
+    $SR({PR, PN}: Area, b: DOMBuilder, r: Range, bR:boolean = true) {
         // Keep all info needed for the update in r.uInfo
-        r.uInfo ||= {b, env, oes, pN, pR, bR};
+        r.uInfo ||= {b, env, oes, PN, PR, bR};
         this.$subr.add(r);
         (r.rvars ||= new Set).add(this);
     }
@@ -717,9 +717,7 @@ const
         get(rv: RV, p) {
             if (p in rv) return rv[p];
 
-            let
-            //  ob = p in rv ? rv : rv.V
-                ob = rv.V
+            let ob = rv.V
             ,   v = ob?.[p]
             ;
             // When the value is a method, bind it to the object, not to the proxy           
@@ -800,7 +798,7 @@ type OES = {e: EventListener, s: EventListener, t:Settings};     // Holder for o
 // Runtime data. All OtoReact DOM updates run synchronously, so the its current state ca
 let env: Environment       // Current runtime environment
 ,   oes: OES = <any>{}    // Current onerror and onsuccess handlers
-,   pN: ParentNode         // Current html node (only for JS evaluation)
+,   PN: ParentNode         // Current html node (only for JS evaluation)
 
 // Dirty variables, which can be either RVAR's or RVAR_Light or any async function
 ,   Jobs = new Set<Job>
@@ -846,7 +844,7 @@ const
 ,   arChk: () => void 
     = () => {
         if (arA){
-            if (arR || arVars && (arR = arA.prR)) {
+            if (arR || arVars && (arR = arA.pR)) {
                 arVars?.forEach((bA, rv) =>
                     // bA = true means update the whole tree
                     arR.uv?.delete(rv) || rv.$SR(arA, arB, arR, !bA)
@@ -935,7 +933,7 @@ class Hndlr implements EventListenerObject {
     handleEvent(ev: Event, ...r: any[]) {
             if (this.h)
                 try {
-                    var {e,s} = oes = this.oes
+                    var {e,s} = this.oes
                     ,   v = this.h.call(ev?.currentTarget, ev, ...r);
                     // Mimic return value treatment of 'onevent' attribute/property
                     v === false && ev.preventDefault();
@@ -1372,14 +1370,14 @@ class RComp {
     public async Build(a: Area) {
         R = this;
         env = [];
-        pN = a.pN;
+        PN = a.PN;
         try {
             await this.bldr(a);
         }
         finally {
             env = U;
         }
-        await DoUpdate();
+        //await DoUpdate();
     }
 
     private bldr: DOMBuilder;
@@ -1556,7 +1554,7 @@ class RComp {
                         ,   {G,S}   = RC.cAny(ats, 'value')
                         ,   bU      = ats.gB('updating') || rv
                         ,   dUpd    = rv   && RC.CAttExp<RVAR>(ats, 'updates')
-                        ,   onM   = rv && RC.CPam<EventListener>(ats, 'onmodified')
+                        ,   onM     = rv && RC.CPam<EventListener>(ats, 'onmodified')
                         ,   dSto    = rv   && RC.CAttExp<Store>(ats, 'store')
                         ,   dSNm    = dSto && RC.CPam<string>(ats, 'storename')
                         ;
@@ -1581,7 +1579,7 @@ class RComp {
                                 }
 
                                 if (rv) {
-                                    if (onM)
+                                    if (onM) 
                                         (r.om ||= new Hndlr).h = onM();
                                     
                                     if (cr) {
@@ -1685,7 +1683,7 @@ class RComp {
                                     ,   s = env
                                     ,   MEnv = env = r.v ||= [];
 
-                                    await b(bIncl ? sub : {pN: D.createDocumentFragment()});
+                                    await b(bIncl ? sub : {PN: D.createDocumentFragment()});
                                 }
                                 finally { env = s; }
                                 // Now 'MEnv' contains all definitions from the module.
@@ -1712,7 +1710,7 @@ class RComp {
                     case 'RHTML': {
                         let S = RC.CPam<string>(ats, 'srctext',T)
                             // Undocumented feature: a pseudo-event fired after the compile phase
-                        ,   dO = RC.CPam<EventListener>(ats, "onc")
+                        ,   onc = RC.CPam<EventListener>(ats, "onc")
                         ,   s: Settings = {bSubf: 2, bTiming: RC.S.bTiming}
                             ;
                         NoChilds(srcE);
@@ -1728,7 +1726,7 @@ class RComp {
                                         dL.href
                                     , s)
                                 ,   sh = C.hd = r.n.shadowRoot || r.n.attachShadow({mode: 'open'})
-                                ,   pR = r.rR ||= new Range(N, N, tag)
+                                ,   PR = r.rR ||= new Range(N, N, tag)
                                 ,   tmp = D.createElement(tag)
                                     ;
 
@@ -1736,7 +1734,7 @@ class RComp {
                                 // Modules are saved in OMod so they don't react on updates, though
                                 (C.doc = D.createDocumentFragment() as Document).appendChild(tmp)
 
-                                pR.erase(sh); 
+                                PR.erase(sh); 
                                 sh.innerHTML = Q;
 
                                 try {
@@ -1745,9 +1743,10 @@ class RComp {
                                     // Compiling
                                     C.ws = ws;
                                     await C.Compile(tmp, tmp.childNodes);
-                                    dO && dO()(U);
+                                    // Oncompiled handler
+                                    onc && onc()(U);
                                     // Building
-                                    await C.Build({ pN: sh, pR });
+                                    await C.Build({ PN: sh, PR });
                                 }
                                 catch(e) { 
                                     sh.appendChild(crErrN(e))
@@ -1790,7 +1789,7 @@ class RComp {
                                             ;
                                             C.hd = Cdoc.head;
                                             env = docEnv;
-                                            let {sub} = SF({pN: Cdoc.body})
+                                            let {sub} = SF({PN: Cdoc.body})
                                             SetLVs(vPams, args);
                                             vWin(w);
                                             try {
@@ -1941,11 +1940,11 @@ class RComp {
                             let {r,cr} = PrepRng<{v:string}>(a, srcE)
                             ,   nm = dN();
                             if (cr)
-                                r.aD = () => (pN as HTMLElement).removeAttribute(r.v);
+                                r.aD = () => (PN as HTMLElement).removeAttribute(r.v);
                             if (r.v && nm != r.v)
                                 r.aD();
                             if (r.v = nm)
-                                (pN as HTMLElement).setAttribute(nm, dV());
+                                (PN as HTMLElement).setAttribute(nm, dV());
                         };
                         break;
 
@@ -1987,19 +1986,19 @@ class RComp {
                     let {r, sub, cr} = PrepRng<{bU: EventListener, aU: EventListener}>(a, srcE)
                     ,   sr = sub.r || T
 
-                    ,   bD = ph(bf, 'bU', sr != T && sr.n || pN);
+                    ,   bD = ph(bf, 'bU', sr != T && sr.n || PN);
 
                     await b(sub, bR);
 
                     // We need the range created or updated by 'b'
                     // This is tricky. It requires that b creates at most one (peer) range
                     let rng = cr
-                            // When we are building, then 'b' has range sub.prR, if any
-                            ? sub.prR
+                            // When we are building, then 'b' has range sub.pR, if any
+                            ? sub.pR
                             // When we are updating, then 'b' has a range when the current sub.r is different from sr, and sr is that range.
                             : <Range>sr                        
                     
-                    ,   aD = ph(af, 'aU', rng.n || pN);
+                    ,   aD = ph(af, 'aU', rng.n || PN);
 
                     if (cr)
                         ass(rng, {bD,aD});
@@ -2101,7 +2100,7 @@ class RComp {
             let r = a.r;
             if (r?.eN) {
                 // Remove an earlier error message in the DOM tree at this point
-                pN.removeChild(r.eN);
+                PN.removeChild(r.eN);
                 r.eN = U;
             }
             try {
@@ -2134,13 +2133,13 @@ class RComp {
                     this.log(msg);
                     e ? e(msg)
                     : this.S.bShowErrors ?
-                        (r||{} as typeof r).eN = a.pN.insertBefore(crErrN(msg), a.r?.FstOrNxt)
+                        (r||{} as typeof r).eN = a.PN.insertBefore(crErrN(msg), a.r?.FstOrNxt)
                     : U;
                     
                     bA && thro(Q);
                 }
             }
-            pN = a.pN;
+            PN = a.PN;
         });
 
         return bl;
@@ -2188,10 +2187,10 @@ class RComp {
 
         return b && (async (a:Area) => {
             let {r, sub} = PrepRng<{p: ParentNode}>(a, srcE);
-            pN = sub.pN = r.p ||= (r.pN = p) || D.createElement(srcE.tagName);
+            PN = sub.PN = r.p ||= (r.PN = p) || D.createElement(srcE.tagName);
             sub.bfor = N;
             try { await b(sub); }
-            finally {pN = a.pN; } 
+            finally {PN = a.PN; } 
             return !p && (r.p as HTMLElement);
         });
     }
@@ -2556,21 +2555,21 @@ class RComp {
 
                         // Now we will either create or re-order and update the DOM
                         let L = nMap.size, x: number
-                        ,   {pN} = sub
+                        ,   {PN} = sub
                         ,   bfor = sub.bfor !== U ? sub.bfor : r.Nxt
                         ,   nxR = <ForRange>r.ch    // This is a pointer into the created list of child ranges
                         ,   bf: ChildNode
                         ,   iter2 =  nMap.values()
                         ,   nxIR = iter2.next()       // Next iteration result
                         ,   prIt: Item
-                        ,   prR: Range
+                        ,   pR: Range
                         ,   k: Key
                         ,   EC = ()=>{
                                 // Erase childranges at the current point with a key that is not in 'nwMap'
                                 while (nxR && !nMap.has(k = nxR.key)) {
                                     if (k != N)
                                         kMap.delete(k);
-                                    nxR.erase(pN);
+                                    nxR.erase(PN);
                                     if (nxR.rv)
                                         nxR.rv.$subr.delete(nxR);
                                     nxR.pv = N;
@@ -2578,7 +2577,7 @@ class RComp {
                                 }
                                 bf = nxR?.FstOrNxt || bfor;
                             }
-                        sub.pR = r;
+                        sub.PR = r;
                         while(!nxIR.done) {
                             // Erase unneeded child ranges, and set 'bf'
                             EC();
@@ -2592,7 +2591,7 @@ class RComp {
                             if (cr) {
                                 // Range has to be newly created
                                 sub.r = N;
-                                sub.prR = prR;
+                                sub.pR = pR;
                                 sub.bfor = bf;
                                 ({r: chR, sub: chAr} = PrepRng(sub));
                                 if (key != N)
@@ -2624,7 +2623,7 @@ class RComp {
                                     }
                                     // Move the wanted range to the current position
                                     for (let n of chR.Nodes())
-                                        pN.insertBefore(n, bf);
+                                        PN.insertBefore(n, bf);
                                     chR.mov = F;
                                     chR.nx = nxR;
                                     break;
@@ -2636,17 +2635,17 @@ class RComp {
                                 // Prepare child range
                                 chAr = PrepRng(sub).sub;
 
-                                sub.pR = N;
+                                sub.PR = N;
                             }
-                            chR.pv = prR;
+                            chR.pv = pR;
                             chR.text = `${letNm}(${ix})`;
 
                             // Update pointers
-                            if (prR) 
-                                prR.nx = chR;
+                            if (pR) 
+                                pR.nx = chR;
                             else
                                 r.ch = chR;
-                            prR = chR;
+                            pR = chR;
 
                             // Look ahead to next iteration result
                             nxIR = iter2.next();
@@ -2692,7 +2691,7 @@ class RComp {
                             prIt = it;
                         }
                         EC();
-                        if (prR) prR.nx = N; else r.ch = N;
+                        if (pR) pR.nx = N; else r.ch = N;
                     };
                 };
             });
@@ -2876,7 +2875,7 @@ class RComp {
                     let {r: {n}, sub: s, cr} = 
                             PrepElm(sub
                                 , /^[A-Z].*-/.test(S.nm) ? S.nm : 'RHTML-'+S.nm)
-                    ,   SR = s.pN = n.shadowRoot || n.attachShadow({mode: 'open'})
+                    ,   SR = s.PN = n.shadowRoot || n.attachShadow({mode: 'open'})
                     ;
                     if (cr)
                         for (let sn of eStyles)
@@ -3176,10 +3175,10 @@ class RComp {
         ,   rI = rIS[bDR] ||= 
                 new RegExp(
                     `\\\\([{}])|\\$${bDR ? Q : '?'}\\{(${rE})(?:::(${rE})|:\\s*(.*?)\\s*)?\\}|$`
-                //   a   x                            e           ff           f                            
+                //   a   x                            e           f            ff                            
                     , 'g'
                 )
-        ,   gens: Array< string | {d:Dep<any>,f:Dep<string>} > = []
+        ,   gens: Array< string | {d:Dep<any>,ff:string, f: Dep<string>} > = []
         ,   ws: WSpc = nm || this.S.bKeepWhiteSpace ? WSpc.preserve : this.ws
         ,   fx = Q
         ,   iT: booly = T         // truthy when the text contains no nonempty embedded expressions
@@ -3205,13 +3204,14 @@ class RComp {
                         : () => {
                             let s = Q, x: any;
                             for (let g of gens)
-                                s+= typeof g == 'string' ? g : (x = g.d(),(g.f ? x?.$F(g.f()) : x?.toString()) ?? Q)
+                                s+= typeof g == 'string' ? g : (x = g.d(),(x?.$F ? x.$F(g.f?.() ?? g.ff) : x?.toString()) ?? Q)
                             return s;
                         };
                 
                 gens.push( {
                     d: this.CExpr<string>(e, nm, U, '{}')
-                    ,f: f ? this.CExpr(f) : ff!=N && K(ff)
+                    ,f: f && this.CExpr(f)
+                    , ff
                 } ); 
                 iT = fx = Q;
             }
@@ -3327,7 +3327,7 @@ class RComp {
             ) as (e:Environment) => T
             ;
         return () => {
-                try { return d(f.call(pN, env)); } 
+                try { return d(f.call(PN, env)); } 
                 catch (e) {throw e+m; } // Runtime error
             };
     }
@@ -3498,8 +3498,8 @@ const
     return c;
 }
 
-// Abbreviate text
-, Abbr = (s: string, m: number=65) =>
+// Abbreviate string to at most m characters
+, Abbr = (s: string, m: number=100) =>
     s.length > m ?
         s.slice(0, m - 3) + "..."
         : s
@@ -3598,7 +3598,7 @@ const
     let d: { [f:string]: Intl.NumberFormat } = oes.t.dN
         , FM: Intl.NumberFormat = d[fm];
     if (!FM) {
-        let m = /^([CDFXN]?)(\d*)(\.(\d*)(-(\d*))?)?$/.exec(tU(fm)) || thro(`Invalid number format '${fm}'`)
+        let m = /^([CDFXN]?)(\d*)(\.(\d*)(-(\d*))?)?$/.exec(tU(fm ?? Q)) || thro(`Invalid number format '${fm}'`)
             , n = pI(m[2])      // Minimum integer digits
             , p = pI(m[4])      // Minimum fraction digits
             , q =pI(m[6]) ?? p  // Maximum fraction digits
@@ -3645,7 +3645,7 @@ const
 } as any;
 
 (Boolean.prototype as any).$F = function(this: boolean, f: string): string{
-    return f.split(';')?.[this ? 0 : 1];
+    return f?.split(';')?.[this ? 0 : 1];
 }
 //#endregion
 
@@ -3702,13 +3702,13 @@ export const
 ,   viewport = RVAR('viewport', visualViewport)
 ,   reroute = 
         (arg: MouseEvent | string) => {
-            if (typeof arg == 'object') {
+            if (!isS(arg)) {
                 if (arg.ctrlKey)
                     return;
-                arg.preventDefault();
                 arg = (arg.currentTarget as HTMLAnchorElement).href;
             }
             dL.V = new URL(arg, L.href);
+            return F; // = preventDefault
         };
 viewport.onresize = viewport.onscroll = _ => viewport.SetDirty();
 //#endregion
@@ -3752,10 +3752,14 @@ export async function RCompile(srcN: HTMLElement & {b?: booly}, setts?: string |
             // Initial build
             AJ(() =>
                 C.Build({
-                    pN: srcN.parentElement,
+                    PN: srcN.parentElement,
                     srcN,           // When srcN is a non-RHTML node (like <BODY>), then it will remain and will receive childnodes and attributes
                     bfor: srcN      // When it is an RHTML-construct, then new content will be inserted before it
-                }).then(ScH).finally(() => srcN.hidden = F)
+                }).then(
+                    ScH // Scroll to hash tag
+                ).finally(
+                    () => srcN.hidden = F   // Unhide
+                )
             );
         }
         catch (e) {    
@@ -3778,7 +3782,7 @@ export async function DoUpdate() {
                 check = async (r:Range) => {
                     if (r && !C.has(r)) {
                         // Make sure parent ranges are always updated before their children
-                        await check(r.pR);
+                        await check(r.PR);
                         if (J.has(r) && r.n !== U)
                             await r.update();
                         C.add(r);

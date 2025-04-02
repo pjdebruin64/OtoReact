@@ -28,20 +28,20 @@ type Environment = [Environment?, ...unknown[]] & {
 };
 type Area<RT extends object = {}, T extends true = true> = {
     r?: Range & RT | T;
-    pN: ParentNode;
+    PN: ParentNode;
     bfor?: ChildNode;
     srcN?: ChildNode;
+    PR?: Range;
     pR?: Range;
-    prR?: Range;
 };
 declare class Range<NodeType extends ChildNode = ChildNode> {
     text?: string;
     n: NodeType;
     ch: Range;
     nx: Range;
-    pR?: Range;
-    pN?: false | ParentNode;
-    constructor(a: Area, n: NodeType, text?: string);
+    PR?: Range;
+    PN?: false | ParentNode;
+    constructor(ar: Area, n: NodeType, text?: string);
     toString(): string;
     get Fst(): ChildNode;
     get Nxt(): ChildNode;
@@ -55,11 +55,11 @@ declare class Range<NodeType extends ChildNode = ChildNode> {
         b: DOMBuilder;
         env: Environment;
         oes: OES;
-        pN: ParentNode;
-        pR: Range;
+        PN: ParentNode;
+        PR: Range;
         bR: boolean;
     };
-    update(): Promise<void>;
+    update(): booly | Promise<booly>;
 }
 export interface Store {
     getItem(key: string): string | null;
@@ -78,7 +78,7 @@ export declare class RV<T = unknown> {
     set V(v: T);
     Subscribe(s: Subscriber<T>, bImm?: boolean, cr?: boolean): this;
     Unsubscribe(s: Subscriber<T>): void;
-    $SR({ pR, pN }: Area, b: DOMBuilder, r: Range, bR?: boolean): void;
+    $SR({ PR, PN }: Area, b: DOMBuilder, r: Range, bR?: boolean): void;
     $UR(r: Range): void;
     get Set(): (t: T | Promise<T>) => void;
     get Clear(): () => void;
