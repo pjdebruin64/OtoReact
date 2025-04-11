@@ -10,7 +10,7 @@ x
 s/.*/dir otoreact.ts/ ; e
 s/^.*(..)-(..)-(....).*/\/* OtoReact version \3-\2-\1/ ; p
 i\
-* Copyright 2022 Peter J. de Bruin (peter@peterdebruin.net)\
+* Copyright 2022-2025 Peter J. de Bruin (peter@peterdebruin.net)\
 * SEE LICENSE IN README.md or https://otoreact.dev/download\
 */
 x
@@ -22,11 +22,12 @@ s/\r//
 
 # Merge lines ending in these characters (without semicolon) with next line, inserting a space
 /[][,{}=:?()&|]$|else$/ {N ; s/\n */ / ; b loop }
+
 # Merge line ending in backslash with next line, removing the backslash
 /\\$/ {N ; s/\\\n// ; b loop }
 
 # Remove semicolons at end of line
-s/;+$//
+#s/;+$//
 
 # Replace (...) => by ... =>
 s/ ?\((\w+)\)\s*=>/ \1=>/g
@@ -44,17 +45,20 @@ t repeat
 # s/;+([}])/\1/g
 
 # Skip emptylines
-/^$/{n;b loop} 
+/^;*$/{n;b loop} 
 
 # Check next line
 N
-# If it starts with one of these chars, then merge
-/\n\s*[\}\?:&|]/{ s/\n\s*// ; b loop }
+# If it starts with one of these chars, then merge without semicolons and loop
+/\n\s*[\}\?:&|]/ { s/;*\n\s*// ; b loop }
 
-# If it starts with ( or [ or class, then merge and (re-)insert semicolon, to prevent unintentional function calls
-/\n\s*([[(]|class)/{ s/\n\s*/;/ ; b loop }
+# If it starts with ( or [ or class, then merge leaving a semicolon, to prevent unintentional function calls
+/\n\s*([[(])/ { s/;\n\s*/;/ ; b loop }
 
-# Otherwise print up to newline, and restart with the remaining (next) line
+# Remove semicolons at end of line
+s/;+\n\s*/\n/
+
+# Print up to newline, and restart with the remaining (next) line
 P
 s/^.*\n//
 b loop

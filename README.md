@@ -4,7 +4,7 @@ HTML-based framework for reactive web applications (SPA's).
 For documentation, see https://otoreact.dev/.
 
 ## Installation
-You can use `npm install otoreact`, or you can just download 'OtoReact.js' and optionally 'OtoLib.html' into your application folder.
+You can use `npm install otoreact`, or you can just download 'OtoReact.js' and optionally 'OtoLib.html' from the github repository into your application folder.
 
 ## License
 Copyright (C) 2022-2025 Peter J. de Bruin (peter@peterdebruin.net)

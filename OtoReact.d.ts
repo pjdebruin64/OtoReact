@@ -37,7 +37,7 @@ type Area<RT extends object = {}, T extends true = true> = {
 declare class Range<NodeType extends ChildNode = ChildNode> {
     text?: string;
     n: NodeType;
-    ch: Range;
+    cR: Range;
     nx: Range;
     PR?: Range;
     PN?: false | ParentNode;
@@ -56,7 +56,6 @@ declare class Range<NodeType extends ChildNode = ChildNode> {
         env: Environment;
         oes: OES;
         PN: ParentNode;
-        PR: Range;
         bR: boolean;
     };
     update(): booly | Promise<booly>;
@@ -69,18 +68,19 @@ export declare class RV<T = unknown> {
     $name?: string;
     $V: T;
     private $C;
-    private $upd;
-    constructor(n: string, t?: T | Promise<T>);
+    private $up;
+    constructor(n: string, t?: T | Promise<T> | (() => T | Promise<T>));
     private $imm;
     $subs: Set<Subscriber<T>>;
     $subr: Set<Range<ChildNode>>;
+    $upd: () => void;
     get V(): T;
     set V(v: T);
     Subscribe(s: Subscriber<T>, bImm?: boolean, cr?: boolean): this;
     Unsubscribe(s: Subscriber<T>): void;
-    $SR({ PR, PN }: Area, b: DOMBuilder, r: Range, bR?: boolean): void;
+    $SR({ PN }: Area, b: DOMBuilder, r: Range, bR?: boolean): void;
     $UR(r: Range): void;
-    get Set(): (t: T | Promise<T>) => void;
+    readonly Set: (t: T | Promise<T>) => void;
     get Clear(): () => void;
     get U(): T;
     set U(t: T);
@@ -90,7 +90,7 @@ export declare class RV<T = unknown> {
     toString(): string;
 }
 export type RVAR<T = any> = T extends [any] ? RV<T> & T : RV<T> & T;
-export declare function RVAR<T>(nm?: string, val?: T | Promise<T>, store?: Store, imm?: Subscriber<T>, storeNm?: string, updTo?: RV): RVAR<T>;
+export declare function RVAR<T>(nm?: string, val?: T | Promise<T> | (() => T | Promise<T>), store?: Store, imm?: Subscriber<T>, storeNm?: string, updTo?: RV): RVAR<T>;
 type Subscriber<T = unknown> = ((t?: T, prev?: T) => unknown);
 type OES = {
     e: EventListener;
@@ -114,7 +114,7 @@ declare class DL extends RV<URL> {
     search(key: string, val: string): string;
     RVAR(key: string, df?: string, nm?: string): RV<string> & string;
 }
-export declare const docLocation: DL & URL, viewport: RV<VisualViewport> & VisualViewport, reroute: (arg: MouseEvent | string) => void;
+export declare const docLocation: DL & URL, viewport: RV<VisualViewport> & VisualViewport, reroute: (arg: MouseEvent | string) => false;
 export declare function RCompile(srcN: HTMLElement & {
     b?: booly;
 }, setts?: string | Settings): Promise<void>;
