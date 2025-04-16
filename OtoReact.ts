@@ -3205,7 +3205,7 @@ class RComp {
                         : () => {
                             let s = Q, x: any;
                             for (let g of gens)
-                                s+= typeof g == 'string' ? g : (x = g.d(),(g.f != U ? x?.$F?.(g.f()) : x?.toString()) ?? Q)
+                                s+= typeof g == 'string' ? g : (x = g.d(),(g.f != N ? RFormat(x, g.f()) : x?.toString()) ?? Q)
                             return s;
                         };
                 
@@ -3593,79 +3593,76 @@ type Format<T = any> = string | ((x:T) => string) | {format: (x:T) => string};
 const
     fmt = new Intl.DateTimeFormat('nl', 
     { day:'2-digit', month: '2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', second: '2-digit', fractionalSecondDigits:3, hour12:false }),
-    reg1 = /(?<dd>0?(?<d>\d+))-(?<MM>0?(?<M>\d+))-(?<yyyy>2.(?<yy>..))\D+(?<HH>0?(?<H>\d+)):(?<mm>0?(?<m>\d+)):(?<ss>0?(?<s>\d+)),(?<fff>(?<ff>(?<f>.).).)/g
-    /*
-    ,
-    fmts: { [t:string]: (x:any, f:string) => string } = {
+    reg1 = /(?<dd>0?(?<d>\d+))-(?<MM>0?(?<M>\d+))-(?<yyyy>2.(?<yy>..))\D+(?<HH>0?(?<H>\d+)):(?<mm>0?(?<m>\d+)):(?<ss>0?(?<s>\d+)),(?<fff>(?<ff>(?<f>.).).)/g;
 
-    },
-    RFormat = (x: any, f: Format) =>  {
-        if (x == N) return Q;
-        switch (typeof f) {
-            case 'string': return fmts[typeof x](x, f);
-            case 'object': return f.format(x);
-            case 'function': return f(x);
-        }
+export function RFormat<T = any>(x: T, f: Format<T>) {
+    switch (typeof f) {
+        case 'string':
+
+            switch (typeof x) {
+                case 'number':
+                    let d: { [f:string]: Intl.NumberFormat } = oes.t.dN
+                        , FM: Intl.NumberFormat = d[f];
+                    if (!FM) {
+                        let m = /^([CDFXN]?)(\d*)(\.(\d*)(-(\d*))?)?$/.exec(tU(f)) || thro(`Invalid number format '${f}'`)
+                            , n = pI(m[2])      // Minimum integer digits
+                            , p = pI(m[4])      // Minimum fraction digits
+                            , q = pI(m[6]) ?? p  // Maximum fraction digits
+                            , o: Intl.NumberFormatOptions & {locale?: string} = { ...oes.t };
+                        switch(m[1]) {
+                            case 'D': n ??= 1; q = p ??= 0;
+                                break;
+                            case 'C': 
+                                o.style = 'currency'; o.useGrouping = T;
+                                q=p=n; n=N; break;
+                            case 'N': 
+                                o.useGrouping = T;
+                                // Fall through
+                            case 'F': 
+                                q=p = n ?? 2; n = 1; break;
+                            case 'X': FM = <Intl.NumberFormat>{ format(x: number) {
+                                    let
+                                        s = tU(x.toString(16)),
+                                        l = s.length;
+                                    return n>l ? '0'.repeat(n-l)+s : s;
+                                }};
+                        }
+                        if (n != N) o.minimumIntegerDigits = n;
+                        if (p != N) o.minimumFractionDigits = p;
+                        if (q != N) o.maximumFractionDigits = q;
+                        d[f] = FM ||= new Intl.NumberFormat(o.locale, o);
+                    }
+                    return FM.format(x);
+
+                case 'object':
+                    return x instanceof Date ?
+                        fmt.format(x).replace(reg1, (f || "yyyy-MM-dd HH:mm:ss").replace( 
+                            /\\(.)|(yy|[MdHms])\2{0,1}|f{1,3}/g, (m,a) => a || `$<${m}>`
+                            )
+                        )
+                        : (x as any).toString(f);
+
+                case 'boolean':
+                    return f.split(';')[x ? 0 : 1];
+
+                case 'string':
+                    let w = pI(f), 
+                        L = Math.abs(w) - x.length, 
+                        S = L > 0 ? ' '.repeat(L) : Q;
+                    return w > 0 ? S + x : x + S;
+            }
+
+        break;
+        case 'object':
+            return f.format(x);
+        case 'function':
+            return f(x);
     }
-*/
-
-    ;
-(Number.prototype as any).$F = function(this: number, fm: string)  {
-    let d: { [f:string]: Intl.NumberFormat } = oes.t.dN
-        , FM: Intl.NumberFormat = d[fm];
-    if (!FM) {
-        let m = /^([CDFXN]?)(\d*)(\.(\d*)(-(\d*))?)?$/.exec(tU(fm ?? Q)) || thro(`Invalid number format '${fm}'`)
-            , n = pI(m[2])      // Minimum integer digits
-            , p = pI(m[4])      // Minimum fraction digits
-            , q =pI(m[6]) ?? p  // Maximum fraction digits
-            , o: Intl.NumberFormatOptions & {locale?: string} = { ...oes.t };
-        switch(m[1]) {
-            case 'D': n ??= 1; q = p ??= 0;
-                break;
-            case 'C': 
-                o.style = 'currency'; o.useGrouping = T;
-                q=p=n; n=N; break;
-            case 'N': 
-                o.useGrouping = T;
-                // Fall through
-            case 'F': 
-                q=p = n ?? 2; n = 1; break;
-            case 'X': FM = <Intl.NumberFormat>{ format(x: number) {
-                    let
-                        s = tU(x.toString(16)),
-                        l = s.length;
-                    return n>l ? '0'.repeat(n-l)+s : s;
-                }};
-        }
-        if (n != N) o.minimumIntegerDigits = n;
-        if (p != N) o.minimumFractionDigits = p;
-        if (q != N) o.maximumFractionDigits = q;
-        d[fm] = FM ||= new Intl.NumberFormat(o.locale, o);
-    }
-    return FM.format(this);
-};
-
-(Date.prototype as any).$F = function(this: Date, f: string) {
-    f ||= "yyyy-MM-dd HH:mm:ss";
-  return fmt.format(this).replace(reg1, f.replace( 
-        /\\(.)|(yy|[MdHms])\2{0,1}|f{1,3}/g, (m,a) => a || `$<${m}>`
-        )
-    );
-};
-
-(String.prototype as any).$F = function(this: string, f: string) : string {
-    let w = parseInt(f), L = Math.abs(w) - this.length;
-    return L > 0 ?
-        w > 0 ? ' '.repeat(L) + this : this + ' '.repeat(L)
-        : this;
-} as any;
-
-(Boolean.prototype as any).$F = function(this: boolean, f: string): string{
-    return f?.split(';')?.[this ? 0 : 1];
 }
 //#endregion
 
 //#region Routing
+// docLocation becomes a proxy to an instance of this class DL:
 class DL extends RV<URL>{
     query: {[fld: string]: string};
     constructor() {
@@ -3680,23 +3677,26 @@ class DL extends RV<URL>{
             ScH(); // Scroll to hash, even when URL remains the same
         });
 
-        this.query = <any>new Proxy<DL>(this, {
-            get( rl, key: string) { return rl.V.searchParams.get(key); }
-            , set( rl, key: string, val: string) {
-                if (val != rl.V.searchParams.get(key)) {
-                    mapSet(rl.V.searchParams as any, key, val);
-                    rl.SetDirty();
+        this.query = <any>new Proxy<DL>(
+            this, 
+            {
+                get: ( dl: DL, key: string) => dl.SP.get(key),
+                set(dl: DL, key: string, val: string) {
+                    if (val != dl.SP.get(key)) {
+                        mapSet(dl.SP as any, key, val);
+                        dl.SetDirty();
+                    }
+                    return T;
                 }
-                return T;
             }
-       });
+        );
     }
     
     basepath: string = U;
     get subpath()  { return dL.pathname.slice(this.basepath.length); }
     set subpath(s) { dL.pathname = this.basepath + s; }
 
-    //get sourcePath() { return R.src; }
+    get SP() { return this.V.searchParams; }
 
     search(key: string, val: string) {
         let U = new URL(this.V);
@@ -3712,21 +3712,23 @@ class DL extends RV<URL>{
     }
 }
 
-const dL = new Proxy( new DL, ProxH ) as DL & URL;
+const 
+    dL = new Proxy( new DL, ProxH ) as DL & URL
+    , vp = RVAR('viewport', visualViewport);
+vp.onresize = vp.onscroll = _ => vp.SetDirty();
 export const
     docLocation = dL
-,   viewport = RVAR('viewport', visualViewport)
+,   viewport = vp
 ,   reroute = 
-        (arg: MouseEvent | string) => {
-            if (typeof arg == 'object') {
-                if (arg.ctrlKey)
+        (h: MouseEvent | string) => {
+            if (typeof h == 'object') {
+                if (h.ctrlKey)
                     return;
-                arg = (arg.currentTarget as HTMLAnchorElement).href;
+                h.preventDefault();
+                h = (h.currentTarget as HTMLAnchorElement).href;
             }
-            dL.V = new URL(arg, L.href);
-            return F; // = preventDefault
+            dL.V = new URL(h, L.href);
         };
-viewport.onresize = viewport.onscroll = _ => viewport.SetDirty();
 //#endregion
 
 let _ur = import.meta.url
