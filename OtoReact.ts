@@ -3662,6 +3662,7 @@ export function RFormat<T = any>(x: T, f: Format<T>) {
 //#endregion
 
 //#region Routing
+// docLocation becomes a proxy to an instance of this class DL:
 class DL extends RV<URL>{
     query: {[fld: string]: string};
     constructor() {
@@ -3676,23 +3677,26 @@ class DL extends RV<URL>{
             ScH(); // Scroll to hash, even when URL remains the same
         });
 
-        this.query = <any>new Proxy<DL>(this, {
-            get( rl, key: string) { return rl.V.searchParams.get(key); }
-            , set( rl, key: string, val: string) {
-                if (val != rl.V.searchParams.get(key)) {
-                    mapSet(rl.V.searchParams as any, key, val);
-                    rl.SetDirty();
+        this.query = <any>new Proxy<DL>(
+            this, 
+            {
+                get: ( dl: DL, key: string) => dl.SP.get(key),
+                set(dl: DL, key: string, val: string) {
+                    if (val != dl.SP.get(key)) {
+                        mapSet(dl.SP as any, key, val);
+                        dl.SetDirty();
+                    }
+                    return T;
                 }
-                return T;
             }
-       });
+        );
     }
     
     basepath: string = U;
     get subpath()  { return dL.pathname.slice(this.basepath.length); }
     set subpath(s) { dL.pathname = this.basepath + s; }
 
-    //get sourcePath() { return R.src; }
+    get SP() { return this.V.searchParams; }
 
     search(key: string, val: string) {
         let U = new URL(this.V);
