@@ -115,6 +115,7 @@ declare class DL extends RV<URL> {
     basepath: string;
     get subpath(): string;
     set subpath(s: string);
+    get SP(): URLSearchParams;
     search(key: string, val: string): string;
     RVAR(key: string, df?: string, nm?: string): RV<string> & string;
 }
