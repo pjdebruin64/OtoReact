@@ -103,6 +103,10 @@ type DOMBuilder<RT = void | booly> = ((a: Area, bR?: boolean) => (RT | Promise<R
 };
 export declare function range(from: number, count?: number, step?: number): Generator<number, void, unknown>;
 export declare function RFetch(req: RequestInfo, init?: RequestInit): Promise<Response>;
+type Format<T = any> = string | ((x: T) => string) | {
+    format: (x: T) => string;
+};
+export declare function RFormat<T = any>(x: T, f: Format<T>): any;
 declare class DL extends RV<URL> {
     query: {
         [fld: string]: string;
@@ -114,7 +118,7 @@ declare class DL extends RV<URL> {
     search(key: string, val: string): string;
     RVAR(key: string, df?: string, nm?: string): RV<string> & string;
 }
-export declare const docLocation: DL & URL, viewport: RV<VisualViewport> & VisualViewport, reroute: (arg: MouseEvent | string) => false;
+export declare const docLocation: DL & URL, viewport: RV<VisualViewport> & VisualViewport, reroute: (h: MouseEvent | string) => void;
 export declare function RCompile(srcN: HTMLElement & {
     b?: booly;
 }, setts?: string | Settings): Promise<void>;

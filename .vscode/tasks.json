@@ -31,12 +31,9 @@
 		},
 
 		{
-			"label": "Minify and publish",
+			"label": "Publish",
 			"type": "shell",
-			"command": "sed -bEi --file=Minify/minify.sed OtoReact.js; rm sed*;npm publish",
-			"windows": {
-				"command": "Minify/bin/sed.exe -bEi --file=Minify\\minify.sed OtoReact.js;del sed*;npm publish"
-			},
+			"command": "npm publish",
 			"group": "build",
 		}
 	]
