@@ -3640,7 +3640,7 @@ export function RFormat<T = any>(x: T, f: Format<T>) {
                             /\\(.)|(yy|[MdHms])\2{0,1}|f{1,3}/g, (m,a) => a || `$<${m}>`
                             )
                         )
-                        : (x as any).toString(f);
+                        : (x as any)?.toString(f);
 
                 case 'boolean':
                     return f.split(';')[x ? 0 : 1];

@@ -1,4 +1,4 @@
-/* OtoReact version 2025-04-16
+/* OtoReact version 2025-04-22
 * Copyright 2022-2025 Peter J. de Bruin (peter@peterdebruin.net)
 * SEE LICENSE IN README.md or https://otoreact.dev/download
 */
@@ -571,7 +571,7 @@ return n>l?'0'.repeat(n-l)+s:s}}}if(n!=N)o.minimumIntegerDigits=n
 if(p!=N)o.minimumFractionDigits=p
 if(q!=N)o.maximumFractionDigits=q
 d[f]=FM||(FM=new Intl.NumberFormat(o.locale,o))}return FM.format(x)
-case'object':return x instanceof Date?fmt.format(x).replace(reg1,(f||"yyyy-MM-dd HH:mm:ss").replace(/\\(.)|(yy|[MdHms])\2{0,1}|f{1,3}/g,(m,a)=>a||`$<${m}>`)):x.toString(f)
+case'object':return x instanceof Date?fmt.format(x).replace(reg1,(f||"yyyy-MM-dd HH:mm:ss").replace(/\\(.)|(yy|[MdHms])\2{0,1}|f{1,3}/g,(m,a)=>a||`$<${m}>`)):x?.toString(f)
 case'boolean':return f.split(';')[x?0:1]
 case'string':let w=pI(f),L=Math.abs(w)-x.length,S=L>0?' '.repeat(L):Q
 return w>0?S+x:x+S}break
