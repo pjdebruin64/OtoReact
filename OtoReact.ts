@@ -389,6 +389,8 @@ const PrepRng = <RT extends object>(
         r = sub.PR = new Range(ar, N
             , srcE ? srcE.tagName + (text && ' ' + text) : text
             );
+        if (ar.srcN && nWipe)   // Just in case this is an rhtml root node with attributes like "rhtml #if=false"
+            ar.srcN.remove();
     }
     else {
         sub.r = r.cR || T;
@@ -403,7 +405,7 @@ const PrepRng = <RT extends object>(
     r.res=res;
     
     return {r, sub, cr} as {r: Range & RT, sub: Area, cr: booly};
-}
+} 
 
 /*  When creating, build a new range containing a new HTMLElement.
     When updating, return the the range created before.
@@ -3770,7 +3772,7 @@ export async function RCompile(srcN: HTMLElement & {b?: booly}, setts?: string |
             await C.Build({
                     PN: srcN.parentElement,
                     srcN,           // When srcN is a non-RHTML node (like <BODY>), then it will remain and will receive childnodes and attributes
-                    bfor: srcN      // When it is an RHTML-construct, then new content will be inserted before it
+                    bfor: srcN.nextSibling      // When it is an RHTML-construct, then new content will be inserted after it
                 });
             ScH();                  // Scroll to hash tag
             srcN.hidden = F   // Unhide

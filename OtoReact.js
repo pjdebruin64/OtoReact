@@ -1,4 +1,4 @@
-/* OtoReact version 2025-04-22
+/* OtoReact version 2025-07-07
 * Copyright 2022-2025 Peter J. de Bruin (peter@peterdebruin.net)
 * SEE LICENSE IN README.md or https://otoreact.dev/download
 */
@@ -34,7 +34,8 @@ cR=cR.nx}}update(){let b,bR;({b,bR,env,oes,PN}=this.uInfo)
 return b({r:this,PN,PR:this.PR},bR)}}const PrepRng=(ar,srcE,text=Q,nWipe,res)=>{let{PN,r}=ar,sub={PN},cr
 if(cr=!r){sub.srcN=ar.srcN
 sub.bfor=ar.bfor
-r=sub.PR=new Range(ar,N,srcE?srcE.tagName+(text&&' '+text):text)}else{sub.r=r.cR||T
+r=sub.PR=new Range(ar,N,srcE?srcE.tagName+(text&&' '+text):text)
+if(ar.srcN&&nWipe)ar.srcN.remove()}else{sub.r=r.cR||T
 ar.r=r.nx||T
 if(cr=nWipe&&(nWipe>1||res!=r.res)){(sub.PR=r).erase(PN)
 sub.r=N
@@ -599,7 +600,7 @@ let s=addS({},setts),m=L.href.match(`^.*(${s?.basePattern||'/'})`),C=new RComp(N
 await C.Compile(srcN)
 srcN.innerHTML=Q
 for(let a of srcN.attributes)a.value=Q
-await C.Build({PN:srcN.parentElement,srcN,bfor:srcN})
+await C.Build({PN:srcN.parentElement,srcN,bfor:srcN.nextSibling})
 ScH()
 srcN.hidden=F}catch(e){alert('OtoReact compile error: '+Abbr(e,1000))}}export async function DoUpdate(){if(Jobs.size&&!env){env=E
 nodeCnt=0
