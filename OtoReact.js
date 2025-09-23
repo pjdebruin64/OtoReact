@@ -1,4 +1,4 @@
-/* OtoReact version 2025-07-07
+/* OtoReact version 2025-09-23
 * Copyright 2022-2025 Peter J. de Bruin (peter@peterdebruin.net)
 * SEE LICENSE IN README.md or https://otoreact.dev/download
 */
@@ -386,7 +386,7 @@ if(!(r.n.hidden=alt!=cAlt)&&!bR||cr)await alt.b(sub)}}else{let{sub,cr}=PrepRng(a
 if(cAlt){if(RRE)RRE.shift(),SetLVs(cAlt.patt.lvars,cAlt.patt.url?RRE.map(decodeURIComponent):RRE)
 if(cr||!bR)await cAlt.b(sub)}}}}}CFor(srcE,ats){let letNm=ats.g('let'),ixNm=ats.g('index',F,F,T)
 this.rt=F
-if(letNm!=N){let dOf=this.CAttExp(ats,'of',T),pvNm=ats.g('previous',F,F,T),nxNm=ats.g('next',F,F,T),dUpd=this.CAttExp(ats,'updates'),bRe=gRe(ats)||dUpd
+if(letNm!=N){let dOf=this.CAttExp(ats,'of',T),pvNm=ats.g('previous',F,F,T),nxNm=ats.g('next',F,F,T),dUpd=this.CAttExp(ats,'updates',F,I),bRe=gRe(ats)||dUpd
 return this.Framed(async SF=>{let vLet=this.LV(letNm),vIx=this.LV(ixNm),vPv=this.LV(pvNm),vNx=this.LV(nxNm),dKey=this.CAttExp(ats,'key'),dHash=this.CAttExps(ats,'hash'),b=await this.CIter(srcE.childNodes)
 return b&&async function FOR(a){let iter=dOf()||E,{r,sub}=PrepRng(a,srcE,Q),sEnv={env,oes},u=r.u=r.u+1||0
 ;
@@ -436,7 +436,7 @@ else vLet(rv).$V=it
 else vLet(it)
 vPv(prIt)
 vNx(nxIR.value?.item)
-if(cr||!hash||hash.some((h,i)=>h!=fr.hash[i]))rv?rv.U:await b(iSub)}finally{EF()}fr.hash=hash
+if(cr||!hash||hash.some((h,i)=>h!=fr.hash[i]))rv&&!dUpd?rv.U:await b(iSub)}finally{EF()}fr.hash=hash
 prIt=it}EC()
 if(pR)pR.nx=N
 else r.cR=N}}})}else{let nm=tU(ats.g('of',T,T)),{S,dC}=this.CT.getCS(nm)||thro(`Missing attribute [let]`)

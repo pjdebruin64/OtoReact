@@ -612,6 +612,7 @@ export class RV<T = unknown> {
     private $imm: Set<Subscriber<T>> = U; // Init is necessary
     // Deferred subscribers
     public $subs: Set<Subscriber<T>> = U;
+    // Subscribed ranges
     public $subr = new Set<Range>;
 
     public $upd: () => void;
@@ -2479,7 +2480,7 @@ class RComp {
                 dOf = this.CAttExp<Iterable<Item> | Promise<Iterable<Item>>>(ats, 'of', T)
             ,   pvNm = ats.g('previous',F,F,T)
             ,   nxNm = ats.g('next',F,F,T)
-            ,   dUpd = this.CAttExp<RV>(ats, 'updates')
+            ,   dUpd = this.CAttExp<RV>(ats, 'updates',F,I)
             ,   bRe: booly = gRe(ats) || dUpd
                 ;
 
@@ -2681,12 +2682,12 @@ class RComp {
                                 // Does current range need building or updating?
                                 if (cr || !hash || hash.some((h,i) => h != fr.hash[i])
                                 )
-                                    rv ? // I.e. when !cr && bRe
+                                    rv // I.e. when !cr && bRe
+                                    && !dUpd    // But not when there is an 'updates' att, which would cause an infinite loop
                                         // Then set the RVAR dirty
-                                        rv.U
-                                    :
+                                    ?   rv.U
                                         // Else build
-                                        await b(iSub);
+                                    :   await b(iSub);
                             }
                             finally { EF(); }
 
