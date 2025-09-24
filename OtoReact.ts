@@ -323,31 +323,31 @@ class Range<NodeType extends ChildNode = ChildNode>{
     // Erase the range, i.e., destroy all child ranges, remove all nodes, unsubscribe from all RVARs, and call all before- and after-destroy handlers.
     // The range itself remains a child of its parent range.
     // The parent node must be specified, or a falsy value when nodes need not be removed.
-    erase(par: falsy | Node) {
-        let {n, cR} = this;
-        if (n && par) {
-            // Remove the current node, only when 'par' is specified
-            par.removeChild(n);
-            par = this.n = N; // No need to remove child nodes of this node
-        }
-        this.cR = N;
+    erase(par?: falsy | Node) {
+        let {n, cR} = this, p = !n && par;
+        this.cR = this.n = N;
         while (cR) {
             // Call a 'beforedestroy' handler
-            cR.bD?.call(cR.n || par);
+            cR.bD?.call(cR.n ?? p);
 
             // Remove range cR from any RVAR it is subscribed to
             cR.rvars?.forEach(rv =>
                 rv.$subr.delete(cR));
 
             // Destroy 'cR'
-            cR.erase(cR.PN ?? par);
+            cR.erase(cR.PN ?? p);
 
             // Call an 'afterdestroy' handler
-            cR.aD?.call(cR.n || par);
+            cR.aD?.call(cR.n ?? p);
 
             cR.n = U;
             cR = cR.nx;
         }
+        if (n && par)
+            // Remove the current node, only when 'par' is specified
+            par.removeChild(n);
+            //par = this.n = N; // No need to remove child nodes of this node
+        
     }
     // info how to update this range, when it is used as a Job
     uInfo?: {b: DOMBuilder, env: Environment, oes: OES, PN: ParentNode, bR: boolean};
@@ -1558,7 +1558,7 @@ class RComp {
                         ,   vLet    = RC.LV(rv || ats.g('let') || ats.g('var', T))
                         ,   {G,S}   = RC.cAny(ats, 'value')
                         ,   bU      = ats.gB('updating') || rv
-                        ,   dUpd    = rv   && RC.CAttExp<RVAR>(ats, 'updates')
+                        ,   dUpd    = rv   && RC.CAttExp<RVAR>(ats, 'updates',F,F)
                         ,   onM     = rv && RC.CPam<EventListener>(ats, 'onmodified')
                         ,   dSto    = rv   && RC.CAttExp<Store>(ats, 'store')
                         ,   dSNm    = dSto && RC.CPam<string>(ats, 'storename')
@@ -1739,8 +1739,6 @@ class RComp {
                                 // Modules are saved in OMod so they don't react on updates, though
                                 (C.doc = D.createDocumentFragment() as Document).appendChild(tmp)
 
-                                PR.erase(sh); 
-                                sh.innerHTML = Q;
 
                                 try {
                                     // Parsing
@@ -1750,6 +1748,10 @@ class RComp {
                                     await C.Compile(tmp, tmp.childNodes);
                                     // Oncompiled handler
                                     onc && onc()(U);
+                                    
+                                    // Remove previous content
+                                    PR.erase(sh);
+                                    
                                     // Building
                                     await C.Build({ PN: sh, PR });
                                 }
@@ -2480,7 +2482,7 @@ class RComp {
                 dOf = this.CAttExp<Iterable<Item> | Promise<Iterable<Item>>>(ats, 'of', T)
             ,   pvNm = ats.g('previous',F,F,T)
             ,   nxNm = ats.g('next',F,F,T)
-            ,   dUpd = this.CAttExp<RV>(ats, 'updates',F,I)
+            ,   dUpd = this.CAttExp<RV>(ats, 'updates',F,F)
             ,   bRe: booly = gRe(ats) || dUpd
                 ;
 
@@ -3249,19 +3251,52 @@ class RComp {
         return {lvars, RE: new RegExp(`^${reg}$`, 'i'), url}; 
     }
 
-    private CPam<T = unknown>(ats: Atts, at: string, bReq?: booly, d=dr): Dep<T> 
+    public CExpr<T>(
+        e: string           // Expression to transform into a function
+    ,   nm?: string             // To be inserted in an errormessage
+    ,   src: string = e    // Source expression
+    ,   dl: string = '""'   // Delimiters to put around the expression when encountering a compiletime or runtime error
+    ,   bD: boolean = T       // Should the result be dereferenced, if it is an RV? Provide 'F' if it should not.
+    ): Dep<T> {
+        if (e == N)
+            return <null>e;  // when 'e' is either null or undefined, return the same
+        
+        e.trim() || thro(nm + `: Empty expression`);
+        
+        var m = '\nat ' + (nm ? `${nm}=` : Q) + dl[0] + Abbr(src) + dl[1] // Error text
+        ,   f = TryV(
+                `${US}(function(${this.gsc(e)}){return(${e}\n)})`  // Expression evaluator
+                , m, Q
+            ) as (e:Environment) => T
+            ;
+        return () => {
+                try { 
+                    let x = f.call(PN, env); 
+                    return bD ? dr(x) : x;
+                } 
+                catch (e) {throw e+m; } // Runtime error
+            };
+    }
+
+    private CAttExps<T>(ats: Atts, attNm: string): Dep<T[]> {
+        let L = ats.g(attNm, F, T);
+        if (L==N) return N;
+        return this.CExpr<T[]>(`[${L}\n]`, attNm);
+    }
+
+    private CAttExp<T>(ats: Atts, at: string, bReq?: booly, bD:boolean=T
+        ) {
+        return this.CExpr<T>(ats.g(at, bReq, T), '#'+at, U,U,bD);
+    }
+    private CPam<T = unknown>(ats: Atts, at: string, bReq?: booly, bD:boolean=T): Dep<T> 
     // Compile parameter (of some OtoReact construct) 
     {
         let txt = ats.g(at);
         return (
-            txt == N ? this.CAttExp<T>(ats, at, bReq, d)
+            txt == N ? this.CAttExp<T>(ats, at, bReq, bD)
             : /^on/.test(at) ? this.CHandlr(txt, at) as Dep<any>
             : this.CText(txt, at) as Dep<any>
         );
-    }
-    private CAttExp<T>(ats: Atts, at: string, bReq?: booly, d=dr
-        ) {
-        return this.CExpr<T>(ats.g(at, bReq, T), '#'+at, U,U,d);
     }
 
     // Compile either a regular attribute 'nm' into just a getter,
@@ -3271,7 +3306,7 @@ class RComp {
     {
         let a='@'+nm, exp = ats.g(a);
         return exp != N ? this.cTwoWay(exp, a)
-            : { G: this.CPam(<Atts>ats, nm, rq, I) };
+            : { G: this.CPam(<Atts>ats, nm, rq, F) };
     }
 
     private cTwoWay<T = unknown>(exp: string, nm: string, bT: booly=T)
@@ -3280,7 +3315,7 @@ class RComp {
     {
         return {
             G: this.CExpr<T>(exp, nm,U,U
-                ,I  // No dereferencing
+                ,F  // No dereferencing
             ),
             S: bT && this.CRout<T>(`(${exp}\n)=$` , '$', `\nin assigment target "${exp}"`)
         };
@@ -3309,36 +3344,6 @@ class RComp {
                     // Handle runtime errors
                     catch(m) {throw m+i;}
                 };
-    }
-
-    public CExpr<T>(
-        e: string           // Expression to transform into a function
-    ,   nm?: string             // To be inserted in an errormessage
-    ,   src: string = e    // Source expression
-    ,   dl: string = '""'   // Delimiters to put around the expression when encountering a compiletime or runtime error
-    ,   d = dr              // Should the result be dereferenced, if it is an RV? Provide 'I' if it should not.
-    ): Dep<T> {
-        if (e == N)
-            return <null>e;  // when 'e' is either null or undefined, return the same
-        
-        e.trim() || thro(nm + `: Empty expression`);
-        
-        var m = '\nat ' + (nm ? `${nm}=` : Q) + dl[0] + Abbr(src) + dl[1] // Error text
-        ,   f = TryV(
-                `${US}(function(${this.gsc(e)}){return(${e}\n)})`  // Expression evaluator
-                , m, Q
-            ) as (e:Environment) => T
-            ;
-        return () => {
-                try { return d(f.call(PN, env)); } 
-                catch (e) {throw e+m; } // Runtime error
-            };
-    }
-
-    private CAttExps<T>(ats: Atts, attNm: string): Dep<T[]> {
-        let L = ats.g(attNm, F, T);
-        if (L==N) return N;
-        return this.CExpr<T[]>(`[${L}\n]`, attNm);
     }
 
     private gsc(exp: string) {
@@ -3790,8 +3795,6 @@ export async function DoUpdate() {
         let u0 = upd;
         start = now();
         while (Jobs.size) {
-            if (upd++ - u0 > 25)
-            { alert('Infinite react-loop'); break; }
             
             let J = Jobs,
                 C = new WeakSet<Range>,
@@ -3804,8 +3807,13 @@ export async function DoUpdate() {
                         C.add(r);
                     };
                 };
-
             Jobs = new Set;
+
+            if (upd++ > u0 + 25) {
+                alert('Infinite react-loop');
+                break;
+            }
+
             for (let j of J)
                 await (j instanceof Range ? check(j) : j());
         }

@@ -1,7 +1,7 @@
 cd ..
 SET Dest=%1
-if "%Dest%"=="" SET Dest=..\..\test\otoreact2\
-"bin\sed.exe" -b -E -f Minify\minify.sed OtoReact.js > %Dest%OtoReact.js
+if "%Dest%"=="" SET Dest=..\..\test\OtoReact2\
+"Minify\bin\sed.exe" -b -E -f Minify\minify.sed OtoReact.js > %Dest%OtoReact.js
 xcopy /y OtoReact.d.ts %Dest%
 xcopy /y OtoReact.ts %Dest%
 xcopy /y *.html %Dest%

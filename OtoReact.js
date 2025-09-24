@@ -1,4 +1,4 @@
-/* OtoReact version 2025-09-23
+/* OtoReact version 2025-09-24
 * Copyright 2022-2025 Peter J. de Bruin (peter@peterdebruin.net)
 * SEE LICENSE IN README.md or https://otoreact.dev/download
 */
@@ -22,15 +22,14 @@ do{p=r.PR
 while(r=r.nx)if(n=r.Fst)return n
 r=p}while(r&&!r.n)}get FstOrNxt(){return this.Fst||this.Nxt}Nodes(){return(function*Nodes(r){let c
 if(r.n)yield r.n
-else if(c=r.cR)do{yield*Nodes(c)}while(c=c.nx)})(this)}erase(par){let{n,cR}=this
-if(n&&par){par.removeChild(n)
-par=this.n=N}this.cR=N
-while(cR){cR.bD?.call(cR.n||par)
+else if(c=r.cR)do{yield*Nodes(c)}while(c=c.nx)})(this)}erase(par){let{n,cR}=this,p=!n&&par
+this.cR=this.n=N
+while(cR){cR.bD?.call(cR.n??p)
 cR.rvars?.forEach(rv=>rv.$subr.delete(cR))
-cR.erase(cR.PN??par)
-cR.aD?.call(cR.n||par)
+cR.erase(cR.PN??p)
+cR.aD?.call(cR.n??p)
 cR.n=U
-cR=cR.nx}}update(){let b,bR;({b,bR,env,oes,PN}=this.uInfo)
+cR=cR.nx}if(n&&par)par.removeChild(n)}update(){let b,bR;({b,bR,env,oes,PN}=this.uInfo)
 return b({r:this,PN,PR:this.PR},bR)}}const PrepRng=(ar,srcE,text=Q,nWipe,res)=>{let{PN,r}=ar,sub={PN},cr
 if(cr=!r){sub.srcN=ar.srcN
 sub.bfor=ar.bfor
@@ -200,7 +199,7 @@ else{let txt=ats.g(at)
 if(/cr|d/.test(at))(m[10]?bf:af).push({at,txt,C:/cr/.test(at),U:/u/.test(at),D:/y/.test(at),h:m[10]&&RC.CHandlr(txt,at)})
 if(/mp/.test(at))TryV(`(function(){${txt}\n})`,at).call(srcE)}if(constr)bl=await RC.CInst(srcE,ats,constr)
 else switch(tag){case'DEF':case'DEFINE':{NoChilds(srcE)
-let rv=ats.g('rvar'),vLet=RC.LV(rv||ats.g('let')||ats.g('var',T)),{G,S}=RC.cAny(ats,'value'),bU=ats.gB('updating')||rv,dUpd=rv&&RC.CAttExp(ats,'updates'),onM=rv&&RC.CPam(ats,'onmodified'),dSto=rv&&RC.CAttExp(ats,'store'),dSNm=dSto&&RC.CPam(ats,'storename')
+let rv=ats.g('rvar'),vLet=RC.LV(rv||ats.g('let')||ats.g('var',T)),{G,S}=RC.cAny(ats,'value'),bU=ats.gB('updating')||rv,dUpd=rv&&RC.CAttExp(ats,'updates',F,F),onM=rv&&RC.CPam(ats,'onmodified'),dSto=rv&&RC.CAttExp(ats,'store'),dSNm=dSto&&RC.CPam(ats,'storename')
 bA=function DEF(a,bR){let{cr,r}=PrepRng(a,srcE),v
 if(bU||arChk()||cr||bR!=N){ro=T
 try{v=G?.()}finally{ro=F}if(rv){if(onM)(r.om||(r.om=new Hndlr)).h=onM()
@@ -235,12 +234,11 @@ case'RHTML':{let S=RC.CPam(ats,'srctext',T),onc=RC.CPam(ats,"onc"),s={bSubf:2,bT
 NoChilds(srcE)
 bl=async function RHTML(a){let{r}=PrepElm(a,'r-html'),src=S()
 if(src!=r.src){let sv=env,C=new RComp(N,dL.href,s),sh=C.hd=r.n.shadowRoot||r.n.attachShadow({mode:'open'}),PR=r.rR||(r.rR=new Range(N,N,tag)),tmp=D.createElement(tag);(C.doc=D.createDocumentFragment()).appendChild(tmp)
-PR.erase(sh)
-sh.innerHTML=Q
 try{tmp.innerHTML=r.src=src
 C.ws=ws
 await C.Compile(tmp,tmp.childNodes)
 onc&&onc()(U)
+PR.erase(sh)
 await C.Build({PN:sh,PR})}catch(e){sh.appendChild(crErrN(e))}finally{env=sv}}}
 break}case'SCRIPT':bA=await RC.CScript(srcE,ats)
 break
@@ -386,7 +384,7 @@ if(!(r.n.hidden=alt!=cAlt)&&!bR||cr)await alt.b(sub)}}else{let{sub,cr}=PrepRng(a
 if(cAlt){if(RRE)RRE.shift(),SetLVs(cAlt.patt.lvars,cAlt.patt.url?RRE.map(decodeURIComponent):RRE)
 if(cr||!bR)await cAlt.b(sub)}}}}}CFor(srcE,ats){let letNm=ats.g('let'),ixNm=ats.g('index',F,F,T)
 this.rt=F
-if(letNm!=N){let dOf=this.CAttExp(ats,'of',T),pvNm=ats.g('previous',F,F,T),nxNm=ats.g('next',F,F,T),dUpd=this.CAttExp(ats,'updates',F,I),bRe=gRe(ats)||dUpd
+if(letNm!=N){let dOf=this.CAttExp(ats,'of',T),pvNm=ats.g('previous',F,F,T),nxNm=ats.g('next',F,F,T),dUpd=this.CAttExp(ats,'updates',F,F),bRe=gRe(ats)||dUpd
 return this.Framed(async SF=>{let vLet=this.LV(letNm),vIx=this.LV(ixNm),vPv=this.LV(pvNm),vNx=this.LV(nxNm),dKey=this.CAttExp(ats,'key'),dHash=this.CAttExps(ats,'hash'),b=await this.CIter(srcE.childNodes)
 return b&&async function FOR(a){let iter=dOf()||E,{r,sub}=PrepRng(a,srcE,Q),sEnv={env,oes},u=r.u=r.u+1||0
 ;
@@ -518,15 +516,16 @@ return s}
 gens.push({d:this.CExpr(e,nm,U,'{}'),f:f?this.CExpr(f):ff!=N?K(ff):U})
 iT=fx=Q}}}CPatt(patt,url){let reg=Q,lvars=[],rP=/\{((?:[^}]|\\\})*)\}|(\?)|(\*)|\[\^?(?:\\[^]|[^\\\]])*\]|$/g
 while(rP.lastIndex<patt.length){let ix=rP.lastIndex,m=rP.exec(patt),lits=patt.slice(ix,m.index)
-reg+=lits.replace(/\W/g,s=>'\\'+s)+(m[1]!=N?(lvars.push(this.LV(m[1])),'(.*?)'):m[2]?'.':m[3]?'.*':m[0])}return{lvars,RE:new RegExp(`^${reg}$`,'i'),url}}CPam(ats,at,bReq,d=dr){let txt=ats.g(at)
-return(txt==N?this.CAttExp(ats,at,bReq,d):/^on/.test(at)?this.CHandlr(txt,at):this.CText(txt,at))}CAttExp(ats,at,bReq,d=dr){return this.CExpr(ats.g(at,bReq,T),'#'+at,U,U,d)}cAny(ats,nm,rq){let a='@'+nm,exp=ats.g(a)
-return exp!=N?this.cTwoWay(exp,a):{G:this.CPam(ats,nm,rq,I)}}cTwoWay(exp,nm,bT=T){return{G:this.CExpr(exp,nm,U,U,I),S:bT&&this.CRout(`(${exp}\n)=$`,'$',`\nin assigment target "${exp}"`)}}CHandlr(txt,nm){return/^#/.test(nm)?this.CExpr(txt,nm,txt):this.CRout(txt,'event',`\nat ${nm}="${Abbr(txt)}"`)}CRout(txt,x,i){let ct=this.gsc(txt),C=TryV(`${US}(function(${x},${ct}){${txt}\n})`,i,Q)
-return(e=env)=>function($){try{return C.call(this,$,e)}catch(m){throw m+i}}}CExpr(e,nm,src=e,dl='""',d=dr){if(e==N)return e
+reg+=lits.replace(/\W/g,s=>'\\'+s)+(m[1]!=N?(lvars.push(this.LV(m[1])),'(.*?)'):m[2]?'.':m[3]?'.*':m[0])}return{lvars,RE:new RegExp(`^${reg}$`,'i'),url}}CExpr(e,nm,src=e,dl='""',bD=T){if(e==N)return e
 e.trim()||thro(nm+`: Empty expression`)
 var m='\nat '+(nm?`${nm}=`:Q)+dl[0]+Abbr(src)+dl[1],f=TryV(`${US}(function(${this.gsc(e)}){return(${e}\n)})`,m,Q)
-return()=>{try{return d(f.call(PN,env))}catch(e){throw e+m}}}CAttExps(ats,attNm){let L=ats.g(attNm,F,T)
+return()=>{try{let x=f.call(PN,env)
+return bD?dr(x):x}catch(e){throw e+m}}}CAttExps(ats,attNm){let L=ats.g(attNm,F,T)
 if(L==N)return N
-return this.CExpr(`[${L}\n]`,attNm)}gsc(exp){let{ct,lvM,d}=this.CT,n=d+1,S=new Set,k
+return this.CExpr(`[${L}\n]`,attNm)}CAttExp(ats,at,bReq,bD=T){return this.CExpr(ats.g(at,bReq,T),'#'+at,U,U,bD)}CPam(ats,at,bReq,bD=T){let txt=ats.g(at)
+return(txt==N?this.CAttExp(ats,at,bReq,bD):/^on/.test(at)?this.CHandlr(txt,at):this.CText(txt,at))}cAny(ats,nm,rq){let a='@'+nm,exp=ats.g(a)
+return exp!=N?this.cTwoWay(exp,a):{G:this.CPam(ats,nm,rq,F)}}cTwoWay(exp,nm,bT=T){return{G:this.CExpr(exp,nm,U,U,F),S:bT&&this.CRout(`(${exp}\n)=$`,'$',`\nin assigment target "${exp}"`)}}CHandlr(txt,nm){return/^#/.test(nm)?this.CExpr(txt,nm,txt):this.CRout(txt,'event',`\nat ${nm}="${Abbr(txt)}"`)}CRout(txt,x,i){let ct=this.gsc(txt),C=TryV(`${US}(function(${x},${ct}){${txt}\n})`,i,Q)
+return(e=env)=>function($){try{return C.call(this,$,e)}catch(m){throw m+i}}}gsc(exp){let{ct,lvM,d}=this.CT,n=d+1,S=new Set,k
 for(let[id]of exp.matchAll(/\b[A-Z_$][A-Z0-9_$]*\b/gi))if(k=lvM.get(id)){if(k.d<n)n=k.d
 S.add(id)}if(n>d)return Q
 let p=d-n,q=p
@@ -606,11 +605,11 @@ srcN.hidden=F}catch(e){alert('OtoReact compile error: '+Abbr(e,1000))}}export as
 nodeCnt=0
 let u0=upd
 start=now()
-while(Jobs.size){if(upd++-u0>25){alert('Infinite react-loop')
-break}let J=Jobs,C=new WeakSet,check=async r=>{if(r&&!C.has(r)){await check(r.PR)
+while(Jobs.size){let J=Jobs,C=new WeakSet,check=async r=>{if(r&&!C.has(r)){await check(r.PR)
 if(J.has(r)&&r.n!==U)await r.update()
 C.add(r)}}
 Jobs=new Set
-for(let j of J)await(j instanceof Range?check(j):j())}if(nodeCnt)R?.log(`Updated ${nodeCnt} nodes in ${(now()-start).toFixed(1)} ms`)
+if(upd++>u0+25){alert('Infinite react-loop')
+break}for(let j of J)await(j instanceof Range?check(j):j())}if(nodeCnt)R?.log(`Updated ${nodeCnt} nodes in ${(now()-start).toFixed(1)} ms`)
 env=U}hUpd=N}EL(W,'pagehide',_=>chWins.forEach(w=>w.close()))
 setTimeout(_=>D.querySelectorAll('*[rhtml]').forEach(src=>RCompile(src,src.getAttribute('rhtml'))),1);
