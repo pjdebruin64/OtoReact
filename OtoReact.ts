@@ -21,7 +21,7 @@ const
 ,   P   = new DOMParser
     
 // Some utilities
-,   I   = x => x
+//,   I   = x => x
 ,   K   = x => () => x
 ,   B   = (f, g) => x => f(g(x))
 
@@ -1720,7 +1720,7 @@ class RComp {
                             ;
                         NoChilds(srcE);
                         bl = async function RHTML(a) {
-                            let {r} = PrepElm<{rR: Range, src: string}>(a, 'r-html')
+                            let {r} = PrepElm<{rR: Range & {eN?: ChildNode}, src: string}>(a, 'r-html')
                             ,   src = S()
                             ;
 
@@ -1731,32 +1731,37 @@ class RComp {
                                         dL.href
                                     , s)
                                 ,   sh = C.hd = r.n.shadowRoot || r.n.attachShadow({mode: 'open'})
-                                ,   PR = r.rR ||= new Range(N, N, tag)
+                                ,   PR = r.rR ||= new Range(N, N, tag) as Range & {eN?: ChildNode}
                                 ,   tmp = D.createElement(tag)
                                     ;
 
+                                // Remove previous error node
+                                PR.eN?.remove();
+
                                 // This is just to allow imports from a module that is included in 'src'
                                 // Modules are saved in OMod so they don't react on updates, though
-                                (C.doc = D.createDocumentFragment() as Document).appendChild(tmp)
-
+                                (C.doc = D.createDocumentFragment() as Document).appendChild(tmp);                                    
 
                                 try {
                                     // Parsing
                                     tmp.innerHTML = r.src = src;
                                     // Compiling
-                                    C.ws = ws;
-                                    await C.Compile(tmp, tmp.childNodes);
-                                    // Oncompiled handler
-                                    onc && onc()(U);
-                                    
-                                    // Remove previous content
-                                    PR.erase(sh);
+                                    try {
+                                        C.ws = ws;
+                                        await C.Compile(tmp, tmp.childNodes);
+                                        // Oncompiled handler
+                                        onc && onc()(U);
+                                    }
+                                    finally {
+                                        // Remove previous content
+                                        PR.erase(sh);
+                                    }
                                     
                                     // Building
                                     await C.Build({ PN: sh, PR });
                                 }
                                 catch(e) { 
-                                    sh.appendChild(crErrN(e))
+                                    PR.eN = sh.appendChild(crErrN(e))
                                 }
                                 finally { env = sv; }
                             }
