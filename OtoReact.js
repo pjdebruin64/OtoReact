@@ -1,4 +1,4 @@
-/* OtoReact version 2025-09-24
+/* OtoReact version 2025-12-10
 * Copyright 2022-2025 Peter J. de Bruin (peter@peterdebruin.net)
 * SEE LICENSE IN README.md or https://otoreact.dev/download
 */
@@ -498,7 +498,7 @@ if(mt==6)M.fp=this.fp;(mt>=9||bAf?af:bf).push(M)
 k++
 return M}
 for(let[A,V]of ats)if(m=/^(?:(([#+.](#)?)?(((class|classname)|style)(?:[.:](\w+))?|on(\w+)\.*|(src(set)?)|(\w*)\.*))|([\*\+#!]+|@@?)(\w*)|\.\.\.(\w+))$/.exec(A)){let[,o,p,h,d,y,c,i,e,s,ss,a,t,w,r]=m
-if(o){let dV=p?this.CExpr(V,A):e?this.CHandlr(V,A):this.CText(V,A),aa
+if(o){let dV=p||c&&i?this.CExpr(V,A):e?this.CHandlr(V,A):this.CText(V,A),aa
 if(aa=a=='shown'?'hidden':a=='enabled'?'disabled':N){a=aa
 dV=B(b=>!b,dV)}if(a=='visible'){i='visibility'
 dV=B(b=>b?N:'hidden',dV)}addM(c?3:i?2:y?4:e?7:s?6:p?d?1:5:0,i||a||e||d,i&&c?()=>Object.fromEntries([[i,dV()]]):dV,(e&&!p||h)&&1,ss)}else if(t){let mP=/[@#](#)?/.exec(t),mT=/([@!])(\1)?/.exec(t),cu=/\*/.test(t)+/\+/.test(t)*2,{G,S}=this.cTwoWay(V,w,mT||cu);(mP?addM(1,w,G,mP[1]&&1):{}).T=mT&&addM(8,w,S,1,mT[2]?'change':'input')
