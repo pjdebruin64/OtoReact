@@ -1,615 +1,2033 @@
-/* OtoReact version 2025-09-24
-* Copyright 2022-2025 Peter J. de Bruin (peter@peterdebruin.net)
-* SEE LICENSE IN README.md or https://otoreact.dev/download
-*/
-const N=null,T=!0,F=!T,U=void 0,Q='',E=[],G=self,W=window,D=document,L=location,US="'use strict';",bD="bDollarRequired",ass=Object.assign,P=new DOMParser,I=x=>x,K=x=>()=>x,B=(f,g)=>x=>f(g(x)),now=()=>performance.now(),thro=e=>{throw e;},V=eval,TryV=(e,m=e,s='\nin ')=>{try{return V(e)}catch(x){throw x+s+m}},isS=x=>typeof x=='string',pI=s=>s?parseInt(s):N,tU=s=>s.toUpperCase(),EL=(et,k,el)=>et.addEventListener(k,el),dflts={bShowErrors:T,bAutoPointer:T,preformatted:E,version:1,currency:'EUR',useGrouping:F},dr=v=>v instanceof RV?v.V:v,rE=(F=>F(F(F('[^]*?'))))(r=>`(?:\\{(?:\\{${r}\\}|[^])*?\\}|'(?:\\\\.|[^])*?'|"(?:\\\\.|[^])*?"|\`(?:\\\\[^]|\\\$\\{${r}}|[^])*?\`|/(?:\\\\.|\[]?(?:\\\\.|.)*?\])*?/|\\?\\.|\\?${r}:|[^])*?`)
-class Context{constructor(CT,a){ass(this,CT||{d:0,L:0,M:0,ct:Q,lvM:new Map,csM:new Map})
-if(a){this.lvM=new Map(this.lvM)
-this.csM=new Map(this.csM)}}getV(k){if(k){let D=this.d
-return(e=env)=>{let{d,i}=k
-while(d++<D)e=e[0]
-return e[i]}}}getLV(nm){return this.getV(this.lvM.get(nm)||thro(`Unknown name '${nm}'`))}getCS(nm){let SK=this.csM.get(nm)
-return SK&&{S:SK.S,dC:this.getV(SK.k)}}max(CT){return ass(CT.L>this.L?CT:this,{M:Math.min(this.M,CT.M)})}}class Range{constructor(ar,n,text){this.text=text
-this.n=n??N
-if(ar){let{PR,pR}=ar
-this.PR=PR
-if(pR)pR.nx=this
-else if(PR)PR.cR=this
-ar.pR=this}}toString(){return this.text||this.n?.nodeName;}get Fst(){if(this.PN==N){let{n,cR}=this
-while(!n&&cR){n=cR.Fst
-cR=cR.nx}return n}}get Nxt(){let r=this,n,p
-do{p=r.PR
-while(r=r.nx)if(n=r.Fst)return n
-r=p}while(r&&!r.n)}get FstOrNxt(){return this.Fst||this.Nxt}Nodes(){return(function*Nodes(r){let c
-if(r.n)yield r.n
-else if(c=r.cR)do{yield*Nodes(c)}while(c=c.nx)})(this)}erase(par){let{n,cR}=this,p=!n&&par
-this.cR=this.n=N
-while(cR){cR.bD?.call(cR.n??p)
-cR.rvars?.forEach(rv=>rv.$subr.delete(cR))
-cR.erase(cR.PN??p)
-cR.aD?.call(cR.n??p)
-cR.n=U
-cR=cR.nx}if(n&&par)par.removeChild(n)}update(){let b,bR;({b,bR,env,oes,PN}=this.uInfo)
-return b({r:this,PN,PR:this.PR},bR)}}const PrepRng=(ar,srcE,text=Q,nWipe,res)=>{let{PN,r}=ar,sub={PN},cr
-if(cr=!r){sub.srcN=ar.srcN
-sub.bfor=ar.bfor
-r=sub.PR=new Range(ar,N,srcE?srcE.tagName+(text&&' '+text):text)
-if(ar.srcN&&nWipe)ar.srcN.remove()}else{sub.r=r.cR||T
-ar.r=r.nx||T
-if(cr=nWipe&&(nWipe>1||res!=r.res)){(sub.PR=r).erase(PN)
-sub.r=N
-sub.bfor=r.Nxt}}r.res=res
-return{r,sub,cr}},PrepElm=(a,tag)=>{let r=a.r,cr=!r
-if(cr)r=new Range(a,a.srcN||a.PN.insertBefore(D.createElement(tag),a.bfor))
-else a.r=r.nx||T
-nodeCnt++
-return{r,sub:{PN:PN=r.n,r:r.cR,bfor:N,PR:r},cr}},PrepData=(a,s,bC)=>{let r=a.r
-if(!r)r=new Range(a,PN.insertBefore(bC?D.createComment(s):D.createTextNode(s),a.bfor))
-else{r.n.data=s
-a.r=r.nx||T}nodeCnt++
-return r}
-class Signat{constructor(srcE,RC){ass(this,{nm:srcE.tagName,srcE,RC,Pams:[],Slots:new Map})
-for(let attr of srcE.attributes){let[a,m,rp,dum,nm,on,q]=/^(#|@|(\.\.\.)|(_)|)((on)?.*?)(\?)?$/.exec(attr.name),v=attr.value
-if(!dum){if(this.RP)throw`Rest parameter must be last`
-nm||rp||thro('Empty parameter name')
-let pDf=v?m?RC.CExpr(v,a):RC.CText(v,a):on&&K(dU)
-this.Pams.push({mode:m,nm,rq:!(q||pDf||rp),pDf:m=='@'?()=>RVAR(U,pDf?.()):pDf})
-this.RP=rp&&nm}}let{ct}=RC.CT,s
-RC.CT.ct=Q
-try{for(let eSlot of srcE.children){mapNm(this.Slots,s=new Signat(eSlot,RC))
-if(/^CONTENT/.test(s.nm))this.CSlot?thro('Multiple content slots'):this.CSlot=s}}finally{RC.CT.ct=ct}}IsCompat(sig){if(sig){let c=T,mP=new Map(map(sig.Pams,p=>[p.nm,p])),p
-for(let{nm,rq}of this.Pams)if(c&&(c=p=mP.get(nm))){c&&(c=rq||!p.rq)
-mP.delete(nm)}for(let p of mP.values())c&&(c=!p.rq)
-for(let[nm,slotSig]of this.Slots)c&&(c=sig.Slots.get(nm)?.IsCompat(slotSig))
-return c}}}export class RV{constructor(n,t){this.$V=U
-this.$C=0
-this.$up=0
-this.$imm=U
-this.$subs=U
-this.$subr=new Set
-this.Set=t=>{if(t instanceof Promise){this.V=U
-let c=this.$C
-t.then(v=>this.$C==c&&(this.V=v),oes.e)}else this.V=t}
-this.$name=n
-if(t instanceof Promise)this.Set(t)
-else if(t instanceof Function){let j=()=>this.Set(t()),s=arV
-arV=new Map
-j()
-for(let rv of arV.keys())rv.Subscribe(()=>AJ(j))
-arV=s}else this.$V=t}get V(){AR(this)
-return this.$V}set V(v){this.$C++
-this.$up=upd
-let p=this.$V
-this.$V=v
-v===p||this.SetDirty(p)}Subscribe(s,bImm,cr){if(s){if(cr)s(this.$V);(bImm?this.$imm||(this.$imm=new Set):this.$subs||(this.$subs=new Set)).add(s)}return this}Unsubscribe(s){this.$imm?.delete(s)
-this.$subs?.delete(s)}$SR({PN},b,r,bR=true){r.uInfo||(r.uInfo={b,env,oes,PN,bR})
-this.$subr.add(r);(r.rvars||(r.rvars=new Set)).add(this)}$UR(r){this.$subr.delete(r)
-r.rvars.delete(this)}get Clear(){return()=>{if(upd>this.$up)this.V=U}}get U(){ro?AR(this):this.SetDirty()
-return this.$V}set U(t){this.$V=t;this.SetDirty();}SetDirty(prev){this.$imm?.forEach(s=>s(this.$V,prev))
-this.$subr.forEach(AJ)
-if(this.$subs)AJ(this.ex||(this.ex=async()=>{for(let s of this.$subs)try{s(this.$V)}catch(e){console.log(e='ERROR: '+Abbr(e,1000))
-alert(e)}}))}valueOf(){return this.V?.valueOf();}toString(){return this.V?.toString()??Q;}}const ProxH={get(rv,p){if(p in rv)return rv[p]
-let ob=rv.V,v=ob?.[p]
-return v instanceof Function?v.bind(ob):v},set(rv,p,v){if(p in rv)rv[p]=v
-else if(v!==rv.$V[p])rv.U[p]=v
-return T},deleteProperty(rv,p){return p in rv.$V?delete rv.U[p]:T},has(rv,p){return p in rv||rv.V!=N&&p in rv.$V}}
-export function RVAR(nm,val,store,imm,storeNm,updTo){if(store){var sNm=storeNm||'RVAR_'+nm,s=store.getItem(sNm)
-if(s)try{val=JSON.parse(s)}catch{}}let rv=new RV(nm||storeNm,val).Subscribe(imm,T)
-store&&rv.Subscribe(v=>store.setItem(sNm,JSON.stringify(v??N)))
-updTo&&rv.Subscribe(()=>updTo.SetDirty(),T)
-rv=new Proxy(rv,ProxH)
-if(nm)G[nm]=rv
-return rv}let env,oes={},PN,Jobs=new Set,hUpd,ro=F,upd=0,nodeCnt=0,start,arV,arA,arR,arB
-const AR=(rv,bA)=>arV&&(bA||!arV.has(rv))&&arV.set(rv,bA),arChk=()=>{if(arV?.size&&(arR||(arR=arA.pR))){arV.forEach((bA,rv)=>arR.uv?.delete(rv)||rv.$SR(arA,arB,arR,!bA))
-arR.uv?.forEach((_,rv)=>rv.$UR(arR))
-arR.uv=arV}arV=N},chWins=new Set,OMods=new Map,NoTime=prom=>{let t=now()
-return prom.finally(()=>start+=now()-t)},AJ=job=>{Jobs.add(job)
-hUpd||(hUpd=setTimeout(DoUpdate,1))}
-let evM=M=>{let v=M.d()
-if(v instanceof RV){if(M.T)M.T.d=K(v.Set)
-v=v.V}return v}
-class Hndlr{constructor(){this.oes=oes}handleEvent(ev,...r){if(this.h)try{var{e,s}=this.oes,v=this.h.call(ev?.currentTarget,ev,...r)
-v===false&&ev.preventDefault()
-v instanceof Promise?v.then(_=>s?.(ev),e):s?.(ev)}catch(er){(e||thro)(er)}}}class Targ{constructor(nm){this.nm=nm}handleEvent(ev){this.S(ev.currentTarget[this.c||(this.c=ChkNm(ev.currentTarget,this.nm))])}}function ApplyAtts(r,cr,ms,k=0,xs){ro=T
-let e=r.n,cu=cr?1:2,hc,i=0
-try{for(let M of ms){if(M.cu&cu){let nm=M.nm,x=xs?xs[i]:evM(M)
-switch(M.mt){case 0:e.setAttribute(nm,x)
-break
-case 1:if(M.isS??(M.isS=isS(e[M.c=ChkNm(e,nm=='for'?'htmlFor':nm=='valueasnumber'?'value':nm)])))x=x==N||x!=x?Q:x.toString()
-if(x!=e[nm=M.c])e[nm]=x
-break
-case 8:cr&&EL(e,M.ev,(r[k]=new Targ(nm)))
-r[k].S=x
-break
-case 7:cr&&EL(e,nm,r[k]=new Hndlr)
-r[k].h=x
-if(M.ap)hc||(hc=x)
-break
-case 4:if(x)isS(x)?(e.style=x):ass(e.style,x)
-break
-case 2:e.style[M.c||(M.c=ChkNm(e.style,nm))]=x||x===0?x:Q
-break
-case 6:e[nm]=x.replace(M.ev?/(.+?)(,|$)/gs:/(.+)()/s,(_,u,r)=>new URL(u,M.fp).href+r)
-break
-case 5:ass(e,x)
-break
-case 3:let p=r[k],n=M.cu&2?(r[k]=new Set):N;(function AC(x){if(x)switch(typeof x){default:throw`Invalid value`
-case'string':for(let C of x.split(/\s+/))if(C){p?.delete(C)||e.classList.add(C)
-n?.add(C)}break
-case'object':if(Array.isArray(x))x.forEach(AC)
-else for(let[nm,b]of Object.entries(x))b&&AC(nm)}})(x)
-if(p)for(let v of p)e.classList.remove(v)
-break
-case 9:if(x)k=ApplyAtts(r,cr,x.ms,k,x.xs)
-break
-case 10:x(nm?e[M.c||(M.c=ChkNm(e,nm))]:e)
-break
-case 11:if(!e.download&&!e.target&&e.href.startsWith(L.origin+dL.basepath))EL(e,'click',reroute)}}i++
-k++}}finally{ro=F}if(hc!==U)e.style.cursor=hc&&!e.disabled?'pointer':Q
-return k}let iRC=0,iLS=0,rIS=[]
-class RComp{constructor(RC,SRC,S,CT=RC?.CT){ass(this,{num:iRC++,S:addS(RC?RC.S:dflts,S),src:SRC||RC?.src,doc:RC?.doc||D,CT:new Context(CT,CT),lscl:RC?.lscl||E,ndcl:RC?.ndcl||0,rActs:[],sPRE:new Set(['PRE']),ws:1,rt:T})
-this.fp=this.src?.replace(/[^/]*$/,Q)
-this.hd=RC?.hd||this.doc.head}Framed(Comp){let{CT,rActs}=this,{ct,d,L,M}=CT,A=rActs.length,nf=L-M
-if(nf){CT.ct=`[${ct}]`
-CT.d++
-CT.L=CT.M=0}return Comp((sub,r)=>{let e=env
-r||({r,sub}=PrepRng(sub))
-env=r.env||(r.env=ass([nf?e:e[0]],{cl:e.cl}))
-return{sub,EF:()=>env=e}}).finally(()=>{this.CT=ass(CT,{ct,d,L,M})
-while(rActs.length>A)rActs.pop()()})}SS(){let{CT,rActs}=this,{ct,L}=CT,A=rActs.length
-return()=>{CT.ct=ct
-+','.repeat(CT.L-L)
-while(rActs.length>A)rActs.pop()()}}LV(nm){if(nm=nm?.trim()){try{/^[A-Z_$][A-Z0-9_$]*$/i.test(nm)||thro()
-V(`let ${nm}=0`)}catch{throw`Invalid identifier '${nm}'`}let{CT}=this,i=++CT.L,vM=CT.lvM,p=vM.get(nm)
-vM.set(nm,{d:CT.d,i})
-this.rActs.push(()=>mapSet(vM,nm,p))
-CT.ct=CT.ct.replace(new RegExp(`\\b${nm}\\b`),Q)+','+nm
-var lv=(v=>env[i]=v)}else lv=dU
-lv.nm=nm
-return lv}LVars(varlist){return Array.from(split(varlist),nm=>this.LV(nm))}LCons(listS){let{CT}=this,{csM:cM,M,d}=CT
-for(let S of listS){let m=S.nm,p=cM.get(m)
-cM.set(m,{S,k:{d,i:--CT.M}})
-this.rActs.push(()=>mapSet(cM,m,p))}return CDefs=>{let i=M
-for(let C of CDefs)env[--i]=C}}async Compile(elm,nodes){for(let tag of this.S.preformatted)this.sPRE.add(tU(tag))
-this.srcCnt=0
-let t0=now(),b=(nodes?await this.CIter(nodes):await this.CElm(elm,T))||dB
-this.log(`Compiled ${this.srcCnt} nodes in ${(now()-t0).toFixed(1)} ms`)
-return this.bldr=async(a,bR)=>{let S=oes.t
-oes.t=this.S
-try{await b(a,bR)}finally{oes.t=S}}}log(msg){if(this.S.bTiming)console.log(new Date().toISOString().substring(11)+` ${this.num}: `+msg)}async Build(a){R=this
-env=[]
-PN=a.PN
-try{await this.bldr(a)}finally{env=U}}async CChilds(PN,nodes=PN.childNodes){let ES=this.SS()
-try{return await this.CIter(nodes)}finally{ES()}}async CIter(iter){let{rt}=this,arr=Array.from(iter),L=arr.length,bs=[],i=0
-while(rt&&L&&!/[^ \t\n\r]/.test(arr[L-1]?.nodeValue))L--
-while(i<L){let srcN=arr[i++],bl,bC
-this.rt=i==L&&rt
-switch(srcN.nodeType){case 1:this.srcCnt++
-bl=await this.CElm(srcN)
-break
-case 8:if(!this.S.bKeepComments)break
-bC=T
-case 3:this.srcCnt++
-let str=srcN.nodeValue,dText=this.CText(str),x=dText.fx
-if(x??T){bl=x?a=>PrepData(a,x,bC):this.ErrH(a=>PrepData(a,dText(),bC))
-if(!bC&&this.ws<4)this.ws=/ $/.test(str)?2:3}}if(bl)bs.push(bl)}return(L=bs.length)>1?async function Iter(a){for(let b of bs)await b(a)}:L?bs[0]:N}async CElm(srcE,bI){let RC=this,tag=srcE.tagName,ats=new Atts(srcE),ga=[],bf=[],af=[],bl,bA,constr=RC.CT.getCS(tag),b,m,nm,ws=RC.ws,S=this.S
-try{for(let[at]of ats)if(m=/^#?(?:(((this)?reacts?on|(on))|(on(error|success)|rhtml)|(hash)|(if|(intl))|renew)|(?:(before)|on|after)(?:create|update|destroy|compile)+)$/
-.exec(at))if(m[1])m[4]&&tag!='REACT'||m[7]&&tag=='FOR'||ga.push({at,m,dV:m[6]?RC.CHandlr(ats.g(at),at):m[5]?K(this.S=addS(S,ats.g(at))):m[8]?RC.CAttExp(ats,at):RC.CAttExps(ats,at)})
-else{let txt=ats.g(at)
-if(/cr|d/.test(at))(m[10]?bf:af).push({at,txt,C:/cr/.test(at),U:/u/.test(at),D:/y/.test(at),h:m[10]&&RC.CHandlr(txt,at)})
-if(/mp/.test(at))TryV(`(function(){${txt}\n})`,at).call(srcE)}if(constr)bl=await RC.CInst(srcE,ats,constr)
-else switch(tag){case'DEF':case'DEFINE':{NoChilds(srcE)
-let rv=ats.g('rvar'),vLet=RC.LV(rv||ats.g('let')||ats.g('var',T)),{G,S}=RC.cAny(ats,'value'),bU=ats.gB('updating')||rv,dUpd=rv&&RC.CAttExp(ats,'updates',F,F),onM=rv&&RC.CPam(ats,'onmodified'),dSto=rv&&RC.CAttExp(ats,'store'),dSNm=dSto&&RC.CPam(ats,'storename')
-bA=function DEF(a,bR){let{cr,r}=PrepRng(a,srcE),v
-if(bU||arChk()||cr||bR!=N){ro=T
-try{v=G?.()}finally{ro=F}if(rv){if(onM)(r.om||(r.om=new Hndlr)).h=onM()
-if(cr){vLet(r.rv=RVAR(U,dr(v),dSto?.(),S?.(),dSNm?.()||rv,dUpd?.()))
-onM&&r.rv.Subscribe(x=>r.om.handleEvent(x))}else r.rv.Set(dr(v))}else vLet(v)}}
-break}case'IF':case'CASE':bl=await RC.CCase(srcE,ats)
-break
-case'FOR':bl=await RC.CFor(srcE,ats)
-break
-case'MODULE':ats.g('id')
-break
-case'INCLUDE':bl=await RC.CIncl(srcE,ats,T)
-break
-case'IMPORT':{let src=ats.src(T),bIncl=ats.gB('include'),bAsync=ats.gB('async'),lvars=RC.LVars(ats.g('defines')),imps=Array.from(map(srcE.children,cR=>new Signat(cR,RC))),DC=RC.LCons(imps),cTask=OMods.get(src)
-if(!cTask){let C=new RComp(RC,RC.gURL(src),{bSubf:T},new Context)
-C.log(src)
-cTask=RC.fetchM(src).then(iter=>C.Compile(N,iter)).then(b=>[b,C.CT])
-if(RC.S.bSubf!=2)OMods.set(src,cTask)}let task=cTask.then(([b,CT])=>{for(let sig of imps){let{S,dC}=CT.getCS(sig.nm)||thro(`<${sig.nm}> is missing in '${src}'`)
-bAsync?!sig.IsCompat(S)&&thro(`Import signature ${sig.srcE.outerHTML} is incompatible with module signature ${S.srcE.outerHTML}`):ass(sig,S)
-sig.g=dC}for(let lv of lvars)lv.g=CT.getLV(lv.nm)
-return b})
-if(!bAsync)for(let sig of imps)sig.task=task
-bA=async function IMPORT(a){let{sub,cr,r}=PrepRng(a,srcE)
-arV=N
-if(cr||bIncl){try{var b=await NoTime(task),s=env,MEnv=env=r.v||(r.v=[])
-await b(bIncl?sub:{PN:D.createDocumentFragment()})}finally{env=s}DC(map(imps,S=>S.g(MEnv)))
-for(let lv of lvars)lv(lv.g(MEnv))}}
-break}case'REACT':b=await RC.CChilds(srcE)
-bl=b&&function(a,bR){return!(a.r&&bR)&&b(a)}
-break
-case'RHTML':{let S=RC.CPam(ats,'srctext',T),onc=RC.CPam(ats,"onc"),s={bSubf:2,bTiming:RC.S.bTiming}
-NoChilds(srcE)
-bl=async function RHTML(a){let{r}=PrepElm(a,'r-html'),src=S()
-if(src!=r.src){let sv=env,C=new RComp(N,dL.href,s),sh=C.hd=r.n.shadowRoot||r.n.attachShadow({mode:'open'}),PR=r.rR||(r.rR=new Range(N,N,tag)),tmp=D.createElement(tag);(C.doc=D.createDocumentFragment()).appendChild(tmp)
-try{tmp.innerHTML=r.src=src
-C.ws=ws
-await C.Compile(tmp,tmp.childNodes)
-onc&&onc()(U)
-PR.erase(sh)
-await C.Build({PN:sh,PR})}catch(e){sh.appendChild(crErrN(e))}finally{env=sv}}}
-break}case'SCRIPT':bA=await RC.CScript(srcE,ats)
-break
-case'COMPONENT':bA=await RC.CComp(srcE,ats)
-break
-case'DOCUMENT':let vNm=RC.LV(ats.g('name',T))
-bA=await RC.Framed(async SF=>{let bEncaps=ats.gB('encapsulate'),C=new RComp(RC),vPams=C.LVars(ats.g('params')),vWin=C.LV(ats.g('window',F,F,T)),H=C.hd=D.createDocumentFragment(),b=await C.CChilds(srcE)
-return function DOCUMENT(a){if(PrepRng(a).cr){let{doc,hd}=RC,docEnv=env,wins=new Set
-vNm({async render(w,cr,args){let s=env,Cdoc=C.doc=w.document
-C.hd=Cdoc.head
-env=docEnv
-let{sub}=SF({PN:Cdoc.body})
-SetLVs(vPams,args)
-vWin(w)
-try{if(cr){if(!bEncaps)for(let SSh of hd.styleSheets||doc.styleSheets){let DSh=Cdoc.head.appendChild(D.createElement('style')).sheet
-for(let rule of SSh.cssRules)DSh.insertRule(rule.cssText)}for(let S of H.childNodes)Cdoc.head.append(S.cloneNode(T))}await b(sub)}finally{env=s}},open(target,features,...args){let w=W.open(Q,target||Q,features),cr=!chWins.has(w)
-if(cr){EL(w,'keydown',ev=>ev.key=='Escape'&&w.close())
-EL(w,'close',_=>{chWins.delete(w);wins.delete(w);})
-chWins.add(w)
-wins.add(w)}w.document.body.innerHTML=Q
-this.render(w,cr,args)
-return w},async print(...args){let f=D.createElement('iframe')
-f.hidden=T
-D.body.appendChild(f)
-await this.render(f.contentWindow,T,args)
-f.contentWindow.print()
-f.remove()},closeAll:()=>wins.forEach(w=>w.close())})}}})
-break
-case'RHEAD':RC.ws=RC.rt=1
-bl=await RC.CUncN(srcE,U,RC.hd)
-RC.ws=ws
-break
-case'STYLE':{let src=ats.src(),sc=ats.g('scope'),nm,{lscl:l,hd}=RC
-if(sc){/^local$/i.test(sc)||thro('Invalid scope')
-nm=`\uFFFE${iLS++}`
-RC.lscl=[...l,nm]
-RC.rActs.push(()=>RC.lscl=l)}(src?RC.FetchT(src):Promise.resolve(srcE.innerText)).then(txt=>{srcE.innerHTML=RC.AddC(txt,nm,src)
-hd.appendChild(srcE)})
-ats.clear()
-break}case'RSTYLE':{let bd=RC.S[bD],sc=ats.g('scope'),{bf,af}=RC.CAtts(ats),i
-try{RC.S[bD]=T
-RC.ws=1
-let b=await(sc?(/^local$/i.test(sc)||thro('Invalid scope'),(i=RC.ndcl++),RC.rActs.push(()=>RC.ndcl--),RC.CUncN(srcE,ats)):RC.CIncl(srcE,ats))
-bl=b&&async function RSTYLE(a){let{r,cr,sub}=PrepElm(a,'STYLE'),k=ApplyAtts(r,cr,bf)
-if(sc){let txt=(await b(a)).innerText,nm=r.cn||(r.cn=`\uFFFE${iLS++}`)
-if(txt!=r.tx)r.n.innerHTML=RC.AddC(r.tx=txt,nm);(env.cl=r.cl||(r.cl=[...env.cl||E]))[i]=nm}else await b(sub)
-ApplyAtts(r,cr,af,k)}}finally{RC.S[bD]=bd
-RC.ws=ws}break}case'ELEMENT':bl=await RC.CHTML(srcE,ats,RC.CPam(ats,'tagname',T))
-RC.ws=3
-break
-case'ATTRIBUTE':NoChilds(srcE)
-let dN=RC.CPam(ats,'name',T),dV=RC.CPam(ats,'value',T)
-bl=function ATTRIB(a){let{r,cr}=PrepRng(a,srcE),nm=dN()
-if(cr)r.aD=()=>PN.removeAttribute(r.v)
-if(r.v&&nm!=r.v)r.aD()
-if(r.v=nm)PN.setAttribute(nm,dV())}
-break
-case'COMMENT':RC.rt=F
-RC.ws=4
-let c=await RC.CUncN(srcE)
-bl=async function COMMENT(a){PrepData(a,(await c(a)).innerText,T)}
-RC.ws=ws
-break
-default:bl=await RC.CHTML(srcE,ats)}bI||ats.None()
-nm=(bl||(bl=bA||(bA=dB))).name
-if(bf.length||af.length){for(let g of af)g.h=RC.CHandlr(g.txt,g.at)
-let b=bl
-bl=async function Pseu(a,bR){let{r,sub,cr}=PrepRng(a,srcE),sr=sub.r||T,bD=ph(bf,'bU',sr!=T&&sr.n||PN)
-await b(sub,bR)
-let rng=cr?sub.pR:sr,aD=ph(af,'aU',rng.n||PN)
-if(cr)ass(rng,{bD,aD})
-function ph(hh,U,elm){if(cr){for(let g of hh){let h=g.h()
-if(g.C)h.call(elm)
-if(g.U)r[U]=h
-if(g.D)var D=h}return D}r[U]?.call(elm)}}}for(let{at,m,dV}of RC.S.version?ga:ga.reverse()){let b=bl,es=(m[5]||m[9])?.[2],bA=!m[3]
-if(m[2])bl=RC.ErrH((a,bR)=>{for(let rv of dV())if(rv)rv.$SR?AR(rv,bA):thro(`This is not an RVAR\nat '${at}'`)
-return b(PrepRng(a,srcE).sub,bR)},srcE)
-else bl=es?async function SetOES(a,bR){let s=oes,{sub,r}=PrepRng(a,srcE,at)
-oes=ass(r.oes||(r.oes={}),oes)
-try{if(es=='t')oes[es]=addS(oes[es],dV())
-else oes[es]=dV()
-await b(sub,bR)}finally{oes=s}}:m[7]?(a,bR)=>{let{sub,r,cr}=PrepRng(a,srcE,at),ph=r.v
-r.v=dV()
-if(cr||r.v.some((hash,i)=>hash!==ph[i]))return b(sub,bR)}:m[8]?function hIf(a,bR){let c=dV(),p=PrepRng(a,srcE,at,1,!c)
-if(c)return b(p.sub,bR)}:(sub,bR)=>b(PrepRng(sub,srcE,at,2).sub,bR)}return bl!=dB&&ass(RC.ErrH(bl,srcE,bA),{nm})}catch(m){throw ErrM(srcE,m)}finally{this.S=S}}ErrH(b,srcN,bA){let bl=b&&(async(a,bR)=>{let r=a.r
-if(r?.eN){PN.removeChild(r.eN)
-r.eN=U}try{arV&&arChk()
-arR=a.r
-arB=bl
-arV=new Map
-let prom=b(arA=a,bR)
-arChk()
-await prom}catch(m){arChk()
-if(m){let msg=srcN instanceof HTMLElement?ErrM(srcN,m,45):m,e=oes.e
-this.S.bAbortOnError&&thro(msg)
-this.log(msg)
-e?e(msg):this.S.bShowErrors?(r||{}).eN=a.PN.insertBefore(crErrN(msg),a.r?.FstOrNxt):U
-bA&&thro(Q)}}PN=a.PN})
-return bl}CIncl(srcE,ats,bR,cn=srcE.childNodes){let src=ats?.src(bR)
-return src?this.Framed(async SF=>{let C=new RComp(this,this.gURL(src),{bSubf:T}),task=srcE.children.length||srcE.textContent.trim()?C.Compile(N,cn):this.fetchM(src).then(cn=>C.Compile(N,cn))
-return async function INCL(a){PrepRng(a,srcE)
-arChk()
-let{sub,EF}=SF(a)
-try{await(await NoTime(task))(sub)}finally{EF()}}}):this.CChilds(srcE,cn)}async CUncN(srcE,ats,p=F){let b=await this.CIncl(srcE,ats)
-return b&&(async a=>{let{r,sub}=PrepRng(a,srcE)
-PN=sub.PN=r.p||(r.p=(r.PN=p)||D.createElement(srcE.tagName))
-sub.bfor=N
-try{await b(sub)}finally{PN=a.PN}return!p&&r.p})}async CScript(srcE,ats){let{type,text,defer,async}=srcE,src=ats.src(),defs=ats.g('defines')||'',m=/^\s*(((text|application)\/javascript|(module)|)|(otoreact)(\/(((local)|static)|global)|(.*?)))\s*(;\s*type\s*=\s*(")?module\12)?\s*$|/i.exec(type),bU=ats.gB('updating'),{ct}=this.CT,lvars=m[8]&&this.LVars(defs),ex
-ats.clear()
-if(m[5]&&(!(m[10]||m[9]&&m[11])||thro("Invalid script type"))||m[2]!=N&&this.S.bSubf){if(m[9]){let prom=(async()=>V(US+`(function([${ct}]){{${src?await this.FetchT(src):text}\nreturn{${defs}}}})`))()
-ex=()=>prom.then(f=>f(env))}else if(m[4]||m[11])ex=K(src?import(this.gURL(src)):import(src=URL.createObjectURL(new Blob([text.replace(/\/\/.*|\/\*[^]*?\*\/|(['"`])(?:\\.|[^])*?\1|(\bimport\b(?:(?:[a-zA-Z0-9_,*{}]|\s)*\bfrom)?\s*(['"]))(.*?)\3/g,(p0,_,p2,p3,p4)=>p2?p2+this.gURL(p4)+p3:p0)],{type:'text/javascript'}))).finally(()=>URL.revokeObjectURL(src)))
-else{let pTxt=(async()=>`${m[5]?US:Q}${src?await this.FetchT(src):text}\n;({${defs}})`)(),Xs
-ex=async()=>Xs||(Xs=V(await pTxt))
-if(src&&async)ex()
-else if(!m[5]&&!defer)await ex()}return async function SCRIPT(a){PrepRng(a,srcE)
-if(bU||arChk()||!a.r){let obj=await ex()
-if(lvars)lvars.forEach(lv=>lv(obj[lv.nm]))
-else ass(G,obj)}}}}async CCase(srcE,ats){let bH=ats.gB('hiding'),dV=this.CAttExp(ats,'value'),cases=[],body=[],bI=srcE.tagName=='IF',bT,bE
-for(let n of srcE.childNodes){if(n instanceof HTMLElement)switch(n.tagName){case'THEN':bT=cases.push({n,ats})
-new Atts(n).None()
-continue
-case'ELSE':bE&&thro("Double <ELSE>")
-bE=T
-case'WHEN':bE||bI&&thro("<IF> contains <WHEN>")
-cases.push({n,ats:new Atts(n)})
-continue}body.push(n)}bI&&!bT?cases.unshift({n:srcE,ats,body}):NoChilds(srcE,body)
-let aList=[],{ws,rt,CT}=this,postCT=CT,postW=0
-for(let{n,ats,body}of cases){if(!bH)this.CT=new Context(CT)
-let ES=ass(this,{ws,rt}).SS(),cond,not=F,patt,p
-try{switch(n.tagName){case'IF':case'THEN':case'WHEN':cond=this.CAttExp(ats,'cond')
-not=ats.gB('not')
-patt=dV&&((p=ats.g('match')??ats.g('pattern'))!=N?this.CPatt(p):(p=ats.g('urlmatch'))!=N?this.CPatt(p,T):(p=ats.g('regmatch')||ats.g('regexp'))!=N?{RE:new RegExp(p,'i'),lvars:this.LVars(ats.g('captures'))}:N)
-patt?.lvars.length&&(bH||not)&&thro(`'match' can't be combined with 'hiding' or 'not'`)
-case'ELSE':aList.push({cond,not,patt,b:await this.CIncl(n,ats,F,body)||dB,n})
-ats.None()
-postW=Math.max(postW,this.ws)
-postCT=postCT.max(this.CT)}}catch(m){throw bI?m:ErrM(n,m)}finally{ES()}}this.ws=!bE&&ws>postW?ws:postW
-this.CT=postCT
-return aList.length&&async function CASE(a,bR){let val=dV?.(),RRE,cAlt
-try{for(var alt of aList)if(!((!alt.cond||alt.cond())&&(!alt.patt||val!=N&&(RRE=alt.patt.RE.exec(val))))==alt.not){cAlt=alt
-break}}catch(m){throw alt.n==srcE?m:ErrM(alt.n,m)}finally{if(bH){for(let alt of aList){let{r,sub,cr}=PrepElm(a,'WHEN')
-if(!(r.n.hidden=alt!=cAlt)&&!bR||cr)await alt.b(sub)}}else{let{sub,cr}=PrepRng(a,srcE,Q,1,cAlt)
-if(cAlt){if(RRE)RRE.shift(),SetLVs(cAlt.patt.lvars,cAlt.patt.url?RRE.map(decodeURIComponent):RRE)
-if(cr||!bR)await cAlt.b(sub)}}}}}CFor(srcE,ats){let letNm=ats.g('let'),ixNm=ats.g('index',F,F,T)
-this.rt=F
-if(letNm!=N){let dOf=this.CAttExp(ats,'of',T),pvNm=ats.g('previous',F,F,T),nxNm=ats.g('next',F,F,T),dUpd=this.CAttExp(ats,'updates',F,F),bRe=gRe(ats)||dUpd
-return this.Framed(async SF=>{let vLet=this.LV(letNm),vIx=this.LV(ixNm),vPv=this.LV(pvNm),vNx=this.LV(nxNm),dKey=this.CAttExp(ats,'key'),dHash=this.CAttExps(ats,'hash'),b=await this.CIter(srcE.childNodes)
-return b&&async function FOR(a){let iter=dOf()||E,{r,sub}=PrepRng(a,srcE,Q),sEnv={env,oes},u=r.u=r.u+1||0
-;
-if(iter instanceof Promise)iter.then(it=>AJ(()=>r.u==u&&updFor(it)),sEnv.oes.e)
-else await updFor(iter)
-async function updFor(iter){({env,oes}=sEnv)
-let si=Symbol.iterator in iter||(Symbol.asyncIterator in iter?arChk():thro(`[of] Value (${iter}) is not iterable`)),kMap=r.v||(r.v=new Map),nMap=new Map,ix=0,{EF}=SF(N,{})
-try{if(si)for(let i of iter)ci(i)
-else for await(let i of iter)ci(i)
-function ci(it){vLet(it)
-vIx(ix)
-let hash=dHash?.(),key=dKey?.()??hash?.[0]
-key!=N&&nMap.has(key)&&thro(`Duplicate key '${key}'`)
-nMap.set(key??{},{it,key,hash,ix:ix++})}}finally{EF()}arChk()
-let L=nMap.size,x,{PN}=sub,bfor=sub.bfor!==U?sub.bfor:r.Nxt,nR=r.cR,bf,iter2=nMap.values(),nxIR=iter2.next(),prIt,pR,k,EC=()=>{while(nR&&!nMap.has(k=nR.key)){if(k!=N)kMap.delete(k)
-nR.erase(PN)
-if(nR.rv)nR.rv.$subr.delete(nR)
-nR.pv=N
-nR=nR.nx}bf=nR?.FstOrNxt||bfor}
-sub.PR=r
-while(!nxIR.done){EC()
-let{it,key,hash,ix}=nxIR.value,fr=kMap.get(key),cr=!fr,chA
-if(cr){sub.r=N
-sub.pR=pR
-sub.bfor=bf;({r:fr,sub:chA}=PrepRng(sub))
-if(key!=N)kMap.set(key,fr)
-fr.key=key}else{while(nR!=fr){if(!fr.mov){if((x=nMap.get(nR.key).ix-ix)*x>L){nR.mov=T
-nR=nR.nx
-EC()
-continue}fr.pv.nx=fr.nx
-if(fr.nx)fr.nx.pv=fr.pv}for(let n of fr.Nodes())PN.insertBefore(n,bf)
-fr.mov=F
-fr.nx=nR
-break}nR=fr.nx
-sub.r=fr
-chA=PrepRng(sub).sub
-sub.PR=N}fr.pv=pR
-fr.text=`${letNm}(${ix})`
-if(pR)pR.nx=fr
-else r.cR=fr
-pR=fr
-nxIR=iter2.next()
-let{sub:iSub,EF}=SF(chA,fr),rv=fr.rv
-try{if(ixNm)vIx(fr.ix||(fr.ix=new RV(ixNm))).V=ix
-if(bRe)if(cr)vLet(fr.rv=RVAR(U,it,N,N,N,dUpd?.()))
-else vLet(rv).$V=it
-else vLet(it)
-vPv(prIt)
-vNx(nxIR.value?.item)
-if(cr||!hash||hash.some((h,i)=>h!=fr.hash[i]))rv&&!dUpd?rv.U:await b(iSub)}finally{EF()}fr.hash=hash
-prIt=it}EC()
-if(pR)pR.nx=N
-else r.cR=N}}})}else{let nm=tU(ats.g('of',T,T)),{S,dC}=this.CT.getCS(nm)||thro(`Missing attribute [let]`)
-return this.Framed(async SF=>{let vIx=this.LV(ixNm),DC=this.LCons([S]),b=await this.CChilds(srcE)
-return b&&async function FOREACH_Slot(a){let{tmps,env}=dC(),{EF,sub}=SF(a),i=0
-try{for(let slotBldr of tmps){vIx(i++)
-DC([{nm,tmps:[slotBldr],env}])
-await b(sub)}}finally{EF()}}})}}async CComp(srcE,ats){let bRec=ats.gB('recursive'),{hd,ws}=this,eStyles=ats.gB('encapsulate')&&(this.hd=D.createDocumentFragment()).children,arr=Array.from(srcE.children),eSig=arr.shift()||thro('Missing signature(s)'),eTem=arr.pop(),t=/^TEMPLATE(S)?$/.exec(eTem?.tagName)||thro('Missing template(s)'),sigs=[],CDefs=[]
-for(let elm of/^SIGNATURES?$/.test(eSig.tagName)?eSig.children:[eSig])sigs.push(new Signat(elm,this))
-try{var DC=bRec&&this.LCons(sigs),ES=this.SS(),b=this.ErrH(await this.CIter(arr),srcE,T)||dB,mapS=new Map(map(sigs,S=>[S.nm,S]))
-for(let[nm,elm,body]of t[1]?map(eTem.children,elm=>[elm.tagName,elm,elm]):[[sigs[0].nm,eTem,eTem.content]]){CDefs.push({nm,tmps:[await this.CTempl(mapS.get(nm)||thro(`Template <${nm}> has no signature`),elm,F,U,body,eStyles)]})
-mapS.delete(nm)}for(let[nm]of mapS)throw`Signature <${nm}> has no template`}finally{ES()
-ass(this,{head:hd,ws})}DC||(DC=this.LCons(sigs))
-return async function COMP(a){DC(CDefs.map(C=>({...C,env})))
-await b(a)}}CTempl(S,srcE,bSlot,ats,body=srcE,eStyles){return this.Framed(async SF=>{this.ws=this.rt=1
-let atts=ats||new Atts(srcE),lvars=S.Pams.map(({mode,nm})=>{let lnm=atts.g(nm)??atts.g(mode+nm)
-return[nm,this.LV(lnm||(lnm===Q||!bSlot?nm:N))]}),DC=this.LCons(S.Slots.values()),b=await this.CIter(body.childNodes)
-ats||atts.None()
-return b&&async function TEMPL(args,mSlots,env,a){if(!a.r)for(let{nm,pDf}of S.Pams)if(pDf&&args[nm]===U)args[nm]=pDf()
-ro=F
-let{sub,EF}=SF(a)
-for(let[nm,lv]of lvars)lv(args[nm])
-DC(map(S.Slots.keys(),nm=>({nm,tmps:mSlots.get(nm)||E,env})))
-if(eStyles){let{r:{n},sub:s,cr}=PrepElm(sub,/^[A-Z].*-/.test(S.nm)?S.nm:'RHTML-'+S.nm),SR=s.PN=n.shadowRoot||n.attachShadow({mode:'open'})
-if(cr)for(let sn of eStyles)SR.appendChild(sn.cloneNode(T))
-sub=s}try{await b(sub)}finally{EF()}}}).catch(m=>thro(`<${S.nm}> template: `+m))}async CInst(srcE,ats,{S,dC}){await S.task
-let{RP,CSlot,Slots}=S,gArgs=[],SBldrs=new Map(map(Slots,([nm])=>[nm,[]]))
-for(let{mode,nm,rq}of S.Pams)if(nm!=RP){let{G,S}=this.cAny(ats,nm,rq)
-mode=='@'&&!S&&(S=K(F))
-if(G)gArgs.push({nm,G,S})}let slotE,slot,nm
-for(let n of Array.from(srcE.children))if((slot=Slots.get(nm=(slotE=n).tagName))&&slot!=CSlot){SBldrs.get(nm).push(await this.CTempl(slot,slotE,T))
-srcE.removeChild(n)}CSlot&&SBldrs.get(CSlot.nm).push(await this.CTempl(CSlot,srcE,T,ats))
-if(RP){let{af}=this.CAtts(ats,T)
-ro=T
-gArgs.push({nm:RP,G:()=>({ms:af,xs:af.map(evM)})})
-ro=F}this.ws=3
-return async function INST(a,bR){let{r,sub,cr}=PrepRng(a,srcE),sEnv=env,cdef=dC(),args=r.args||(r.args=Object.create(N))
-if(cdef)try{ro=T
-for(let{nm,G,S}of gArgs){let v=G()
-if(!S||v instanceof RV){bR&&(bR=v==args[nm])
-args[nm]=v}else if(cr)args[nm]=RVAR(U,v,U,S())
-else args[nm].V=v}arChk()
-env=cdef.env
-if(cr||!bR)for(let tmpl of cdef.tmps)await tmpl?.(args,SBldrs,sEnv,sub)}finally{env=sEnv
-ro=F}}}async CHTML(srcE,ats,dTag){let nm=dTag?N:srcE.tagName.replace(/\.+$/,Q),preW=this.ws,postW,m
-if(this.sPRE.has(nm)||/^.re/.test(srcE.style.whiteSpace)){this.ws=4
-postW=1}else if(m=rBlock.exec(nm)){this.ws=this.rt=1
-postW=m[2]?3:1}if(preW==4)postW=preW
-let{bf,af}=this.CAtts(ats,nm=='SELECT'),b=await this.CChilds(srcE),{lscl,ndcl}=this
-if(postW)this.ws=postW
-if(nm=='A'&&this.S.bAutoReroute&&bf.every(({nm})=>nm!='click'))af.push({mt:11,d:dU,cu:1})
-bf.length||(bf=U)
-af.length||(af=U)
-return async function ELM(a,bR){let{r,sub,cr}=PrepElm(a,nm||dTag()),k=bf&&ApplyAtts(r,cr,bf),xs=(ro=af)?.map(evM)
-ro=F
-if(cr){for(let nm of lscl)r.n.classList.add(nm)
-for(let i=0;i<ndcl;i++)r.n.classList.add(env.cl[i])}if(cr||!bR)await b?.(sub)
-af&&ApplyAtts(r,cr,af,k,xs)}}CAtts(ats,bAf){let bf=[],af=[],k=0,m,ap=this.S.bAutoPointer,addM=(mt,nm,d,cu,ev)=>{let M={mt,nm,d,cu:cu||(d.fx!=N?1:3),ev}
-if(ap&&mt==7)M.ap=nm=='click'
-if(mt==6)M.fp=this.fp;(mt>=9||bAf?af:bf).push(M)
-k++
-return M}
-for(let[A,V]of ats)if(m=/^(?:(([#+.](#)?)?(((class|classname)|style)(?:[.:](\w+))?|on(\w+)\.*|(src(set)?)|(\w*)\.*))|([\*\+#!]+|@@?)(\w*)|\.\.\.(\w+))$/.exec(A)){let[,o,p,h,d,y,c,i,e,s,ss,a,t,w,r]=m
-if(o){let dV=p?this.CExpr(V,A):e?this.CHandlr(V,A):this.CText(V,A),aa
-if(aa=a=='shown'?'hidden':a=='enabled'?'disabled':N){a=aa
-dV=B(b=>!b,dV)}if(a=='visible'){i='visibility'
-dV=B(b=>b?N:'hidden',dV)}addM(c?3:i?2:y?4:e?7:s?6:p?d?1:5:0,i||a||e||d,i&&c?()=>Object.fromEntries([[i,dV()]]):dV,(e&&!p||h)&&1,ss)}else if(t){let mP=/[@#](#)?/.exec(t),mT=/([@!])(\1)?/.exec(t),cu=/\*/.test(t)+/\+/.test(t)*2,{G,S}=this.cTwoWay(V,w,mT||cu);(mP?addM(1,w,G,mP[1]&&1):{}).T=mT&&addM(8,w,S,1,mT[2]?'change':'input')
-cu&&addM(10,w,S,cu)}else V?thro('A rest parameter cannot have a value'):addM(9,A,this.CT.getLV(r))
-ats.delete(A)}return{bf,af}}CText(text,nm){let bDR=this.S[bD]?1:0,rI=rIS[bDR]||(rIS[bDR]=new RegExp(`\\\\([{}])|\\$${bDR?Q:'?'}\\{(${rE})(?:::(${rE})|:\\s*(.*?)\\s*)?\\}|$`,'g')),gens=[],ws=nm||this.S.bKeepWhiteSpace?4:this.ws,fx=Q,iT=T
-rI.lastIndex=0
-while(T){let lastIx=rI.lastIndex,m=rI.exec(text),[a,x,e,f,ff]=m
-fx+=text.slice(lastIx,m.index)+(x||Q)
-if(!a||e){if(ws<4){fx=fx.replace(/[ \t\n\r]+/g," ")
-if(ws<=2&&!gens.length)fx=fx.replace(/^ /,Q)
-if(this.rt&&!a)fx=fx.replace(/ $/,Q)}fx&&gens.push(fx)
-if(!a)return iT?ass(()=>fx,{fx}):()=>{let s=Q,x
-for(let g of gens)s+=typeof g=='string'?g:(x=g.d(),(g.f!=N?RFormat(x,g.f()):x?.toString())??Q)
-return s}
-gens.push({d:this.CExpr(e,nm,U,'{}'),f:f?this.CExpr(f):ff!=N?K(ff):U})
-iT=fx=Q}}}CPatt(patt,url){let reg=Q,lvars=[],rP=/\{((?:[^}]|\\\})*)\}|(\?)|(\*)|\[\^?(?:\\[^]|[^\\\]])*\]|$/g
-while(rP.lastIndex<patt.length){let ix=rP.lastIndex,m=rP.exec(patt),lits=patt.slice(ix,m.index)
-reg+=lits.replace(/\W/g,s=>'\\'+s)+(m[1]!=N?(lvars.push(this.LV(m[1])),'(.*?)'):m[2]?'.':m[3]?'.*':m[0])}return{lvars,RE:new RegExp(`^${reg}$`,'i'),url}}CExpr(e,nm,src=e,dl='""',bD=T){if(e==N)return e
-e.trim()||thro(nm+`: Empty expression`)
-var m='\nat '+(nm?`${nm}=`:Q)+dl[0]+Abbr(src)+dl[1],f=TryV(`${US}(function(${this.gsc(e)}){return(${e}\n)})`,m,Q)
-return()=>{try{let x=f.call(PN,env)
-return bD?dr(x):x}catch(e){throw e+m}}}CAttExps(ats,attNm){let L=ats.g(attNm,F,T)
-if(L==N)return N
-return this.CExpr(`[${L}\n]`,attNm)}CAttExp(ats,at,bReq,bD=T){return this.CExpr(ats.g(at,bReq,T),'#'+at,U,U,bD)}CPam(ats,at,bReq,bD=T){let txt=ats.g(at)
-return(txt==N?this.CAttExp(ats,at,bReq,bD):/^on/.test(at)?this.CHandlr(txt,at):this.CText(txt,at))}cAny(ats,nm,rq){let a='@'+nm,exp=ats.g(a)
-return exp!=N?this.cTwoWay(exp,a):{G:this.CPam(ats,nm,rq,F)}}cTwoWay(exp,nm,bT=T){return{G:this.CExpr(exp,nm,U,U,F),S:bT&&this.CRout(`(${exp}\n)=$`,'$',`\nin assigment target "${exp}"`)}}CHandlr(txt,nm){return/^#/.test(nm)?this.CExpr(txt,nm,txt):this.CRout(txt,'event',`\nat ${nm}="${Abbr(txt)}"`)}CRout(txt,x,i){let ct=this.gsc(txt),C=TryV(`${US}(function(${x},${ct}){${txt}\n})`,i,Q)
-return(e=env)=>function($){try{return C.call(this,$,e)}catch(m){throw m+i}}}gsc(exp){let{ct,lvM,d}=this.CT,n=d+1,S=new Set,k
-for(let[id]of exp.matchAll(/\b[A-Z_$][A-Z0-9_$]*\b/gi))if(k=lvM.get(id)){if(k.d<n)n=k.d
-S.add(id)}if(n>d)return Q
-let p=d-n,q=p
-while(n--)q=ct.indexOf(']',q)+1
-return`[${ct.slice(0, p)}${ct.slice(q).replace(new RegExp(`\\b(${[...S].join('|')})\\b|[^\\],]+`, 'g'), '$1')}]`}gURL(src){return new URL(src,this.fp).href}AddC(txt,nm,src){return`/* From ${src||this.src} */\n`+(nm?txt.replaceAll(/{(?:{.*?}|.)*?}|@[msd].*?{|@[^{;]*|(?:\w*\|)?(\w|[-.#:()\u00A0-\uFFFF]|\[(?:(['"])(?:\\.|.)*?\2|.)*?\]|\\[0-9A-F]+\w*|\\.|(['"])(?:\\.|.)*?\3)+/gsi,(m,p)=>p?`${m}.${nm}`:m):txt)}async FetchT(src){return(await RFetch(this.gURL(src),{headers:this.S.headers})).text()}async fetchM(src){let m=this.doc.getElementById(src),M='MODULE'
-if(!m){let{head,body}=P.parseFromString(await this.FetchT(src).catch(e=>thro(e+`\nin '${this.src}'`)),'text/html'),e=body.firstElementChild
-if(e?.tagName!=M)return[...head.childNodes,...body.childNodes]
-m=e}else if(m.tagName!=M)throw`'${src}' must be a <${M}>`
-return m.childNodes}}class Atts extends Map{constructor(elm){super()
-this.elm=elm
-for(let a of elm.attributes)if(!/^_/.test(a.name))super.set(a.name,a.value)}g(nm,bReq,bHash,bI){let m,gg=nm=>super.get(m=nm),v=gg(nm)??(bHash?gg('#'+nm):N)
-if(v!=N)super.delete(m)
-else if(bReq)throw`Missing attribute '${nm}'`
-return bI&&v==Q?nm:v}src(bR,m='src'){let v=this.g(m,bR)
-return v&&EC.CText(v,m)()}gB(nm,df=F){let v=this.g(nm)
-return v==N?df:!(/^((false|no)|true|yes)?$/i.exec(v)||thro(`@${nm}: invalid value`))[2]}None(){super.delete('hidden')
-if(this.size)throw`Unknown attribute(s): `+Array.from(super.keys()).join(',')}}const dU=_=>U,dB=a=>{PrepRng(a);},rBlock=/^(BODY|BLOCKQUOTE|D[DLT]|DIV|FORM|H\d|HR|LI|[OU]L|P|TABLE|T[RHD]|PRE|(BUTTON|INPUT|IMG|SELECT|TEXTAREA))$/,Cnms={__proto__:N},addS=(S,A)=>({...S,...isS(A)?TryV(`({${A}})`,'settings'):A,dN:A?{}:S.dN}),ChkNm=(obj,nm)=>{let c=Cnms[nm],r
-if(!c){c=nm
-if(!(nm in obj)){r=new RegExp(`^${nm}$`,'i')
-for(let p in obj)if(r.test(p)){c=p
-break}}Cnms[nm]=c}return c},Abbr=(s,m=100)=>s.length>m?s.slice(0,m-3)+"...":s,SetLVs=(vars,data)=>vars.forEach((v,i)=>v(data[i])),mapNm=(m,o)=>m.set(o.nm,o),mapSet=(m,nm,v)=>v!=N?m.set(nm,v):m.delete(nm),ErrM=(elm,e=Q,maxL)=>e+`\nat ${Abbr(elm.outerHTML, maxL)}`,crErrN=m=>ass(D.createElement('div'),{style:'color:crimson;font-family:sans-serif;font-size:10pt;white-space: pre;',innerText:m}),NoChilds=(srcE,cn=srcE.childNodes)=>{for(let n of cn)if(n.nodeType==1||n.nodeType==3&&n.nodeValue.trim())throw`<${srcE.tagName} ...> has unwanted content`},EC=new RComp,ScH=()=>L.hash&&setTimeout((_=>D.getElementById(L.hash.slice(1))?.scrollIntoView()),6),gRe=ats=>ats.gB('reacting')||ats.gB('reactive')
-function*map(I,f,c){for(let x of I)if(!c||c(x))yield f(x)}function*split(s){if(s)for(let v of s.split(','))yield v.trim()}export function range(from,count,step=1){if(count===U){count=from
-from=0}return(function*(f,c,s){while(c--){yield f
-f+=s}})(Number(from),Number(count),Number(step))}export async function RFetch(req,init){try{let rp=await fetch(req,init)
-rp.ok||thro(`Status ${rp.status} ${rp.statusText}`)
-return rp}catch(e){throw`${init?.method||'GET'} ${req}: `+e}}const fmt=new Intl.DateTimeFormat('nl',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',fractionalSecondDigits:3,hour12:false}),reg1=/(?<dd>0?(?<d>\d+))-(?<MM>0?(?<M>\d+))-(?<yyyy>2.(?<yy>..))\D+(?<HH>0?(?<H>\d+)):(?<mm>0?(?<m>\d+)):(?<ss>0?(?<s>\d+)),(?<fff>(?<ff>(?<f>.).).)/g
-export function RFormat(x,f){switch(typeof f){case'string':switch(typeof x){case'number':let d=oes.t.dN,FM=d[f]
-if(!FM){let m=/^([CDFXN]?)(\d*)(\.(\d*)(-(\d*))?)?$/.exec(tU(f))||thro(`Invalid number format '${f}'`),n=pI(m[2]),p=pI(m[4]),q=pI(m[6])??p,o={...oes.t}
-switch(m[1]){case'D':n??(n=1)
-q=p??(p=0)
-break
-case'C':o.style='currency'
-o.useGrouping=T
-q=p=n
-n=N
-break
-case'N':o.useGrouping=T
-case'F':q=p=n??2
-n=1
-break
-case'X':FM={format(x){let s=tU(x.toString(16)),l=s.length
-return n>l?'0'.repeat(n-l)+s:s}}}if(n!=N)o.minimumIntegerDigits=n
-if(p!=N)o.minimumFractionDigits=p
-if(q!=N)o.maximumFractionDigits=q
-d[f]=FM||(FM=new Intl.NumberFormat(o.locale,o))}return FM.format(x)
-case'object':return x instanceof Date?fmt.format(x).replace(reg1,(f||"yyyy-MM-dd HH:mm:ss").replace(/\\(.)|(yy|[MdHms])\2{0,1}|f{1,3}/g,(m,a)=>a||`$<${m}>`)):x?.toString(f)
-case'boolean':return f.split(';')[x?0:1]
-case'string':let w=pI(f),L=Math.abs(w)-x.length,S=L>0?' '.repeat(L):Q
-return w>0?S+x:x+S}break
-case'object':return f.format(x)
-case'function':return f(x)}}class DL extends RV{constructor(){super('docLocation',new URL(L.href))
-this.basepath=U
-EL(W,'popstate',_=>this.U.href=L.href)
-this.Subscribe(url=>{url.href==L.href||history.pushState(N,N,url.href)
-ScH()})
-this.query=new Proxy(this,{get:(dl,key)=>dl.SP.get(key),set(dl,key,val){if(val!=dl.SP.get(key)){mapSet(dl.SP,key,val)
-dl.SetDirty()}return T}})}get subpath(){return dL.pathname.slice(this.basepath.length);}set subpath(s){dL.pathname=this.basepath+s;}get SP(){return this.V.searchParams;}search(key,val){let U=new URL(this.V)
-mapSet(U.searchParams,key,val)
-return U.href}RVAR(key,df,nm=key){let g=()=>this.query[key],rv=RVAR(nm,Q,N,v=>this.query[key]=v)
-this.Subscribe(_=>rv.V=g()??df,T,T)
-return rv}}const dL=new Proxy(new DL,ProxH),vp=RVAR('viewport',visualViewport)
-vp.onresize=vp.onscroll=_=>vp.SetDirty()
-export const docLocation=dL,viewport=vp,reroute=h=>{if(typeof h=='object'){if(h.ctrlKey)return
-h.preventDefault()
-h=h.currentTarget.href}dL.V=new URL(h,L.href)}
-let _ur=import.meta.url,R
-if(G._ur)alert(`OtoReact loaded twice,\nfrom: ${G._ur}\nand: ${_ur}`),thro()
-ass(G,{RVAR,range,reroute,RFetch,DoUpdate,docLocation,debug:V('()=>{debugger}'),_ur})
-export async function RCompile(srcN,setts){if(srcN.isConnected&&!srcN.b)try{srcN.b=T
-let s=addS({},setts),m=L.href.match(`^.*(${s?.basePattern||'/'})`),C=new RComp(N,L.origin+(dL.basepath=m?new URL(m[0]).pathname:Q),s)
-await C.Compile(srcN)
-srcN.innerHTML=Q
-for(let a of srcN.attributes)a.value=Q
-await C.Build({PN:srcN.parentElement,srcN,bfor:srcN.nextSibling})
-ScH()
-srcN.hidden=F}catch(e){alert('OtoReact compile error: '+Abbr(e,1000))}}export async function DoUpdate(){if(Jobs.size&&!env){env=E
-nodeCnt=0
-let u0=upd
-start=now()
-while(Jobs.size){let J=Jobs,C=new WeakSet,check=async r=>{if(r&&!C.has(r)){await check(r.PR)
-if(J.has(r)&&r.n!==U)await r.update()
-C.add(r)}}
-Jobs=new Set
-if(upd++>u0+25){alert('Infinite react-loop')
-break}for(let j of J)await(j instanceof Range?check(j):j())}if(nodeCnt)R?.log(`Updated ${nodeCnt} nodes in ${(now()-start).toFixed(1)} ms`)
-env=U}hUpd=N}EL(W,'pagehide',_=>chWins.forEach(w=>w.close()))
-setTimeout(_=>D.querySelectorAll('*[rhtml]').forEach(src=>RCompile(src,src.getAttribute('rhtml'))),1);
+const N = null, T = !0, F = !T, U = void 0, Q = '', E = [], G = self, W = window, D = document, L = location, US = "'use strict';", bD = "bDollarRequired", ass = Object.assign, P = new DOMParser, I = x => x, K = x => () => x, B = (f, g) => x => f(g(x)), now = () => performance.now(), thro = (e) => { throw e; }, V = eval, TryV = (e, m = e, s = '\nin ') => {
+    try {
+        return V(e);
+    }
+    catch (x) {
+        throw x + s + m;
+    }
+}, isS = (x) => typeof x == 'string', pI = (s) => s ? parseInt(s) : N, tU = (s) => s.toUpperCase(), EL = (et, k, el) => et.addEventListener(k, el), dflts = {
+    bShowErrors: T,
+    bAutoPointer: T,
+    preformatted: E,
+    version: 1,
+    currency: 'EUR',
+    useGrouping: F
+}, dr = (v) => v instanceof RV ? v.V : v, rE = ((F) => F(F(F('[^]*?'))))((r) => `(?:\\{(?:\\{${r}\\}|[^])*?\\}\
+|'(?:\\\\.|[^])*?'\
+|"(?:\\\\.|[^])*?"\
+|\`(?:\\\\[^]|\\\$\\{${r}}|[^])*?\`\
+|/(?:\\\\.|\[]?(?:\\\\.|.)*?\])*?/\
+|\\?\\.\
+|\\?${r}:\
+|[^])*?`);
+class Context {
+    constructor(CT, a) {
+        ass(this, CT || {
+            d: 0, L: 0, M: 0, ct: Q,
+            lvM: new Map, csM: new Map
+        });
+        if (a) {
+            this.lvM = new Map(this.lvM);
+            this.csM = new Map(this.csM);
+        }
+    }
+    getV(k) {
+        if (k) {
+            let D = this.d;
+            return (e = env) => {
+                let { d, i } = k;
+                while (d++ < D)
+                    e = e[0];
+                return e[i];
+            };
+        }
+    }
+    getLV(nm) {
+        return this.getV(this.lvM.get(nm) || thro(`Unknown name '${nm}'`));
+    }
+    getCS(nm) {
+        let SK = this.csM.get(nm);
+        return SK && { S: SK.S, dC: this.getV(SK.k) };
+    }
+    max(CT) {
+        return ass(CT.L > this.L ? CT : this, {
+            M: Math.min(this.M, CT.M)
+        });
+    }
+}
+class Range {
+    constructor(ar, n, text) {
+        this.text = text;
+        this.n = n ?? N;
+        if (ar) {
+            let { PR, pR } = ar;
+            this.PR = PR;
+            if (pR)
+                pR.nx = this;
+            else if (PR)
+                PR.cR = this;
+            ar.pR = this;
+        }
+    }
+    toString() { return this.text || this.n?.nodeName; }
+    get Fst() {
+        if (this.PN == N) {
+            let { n, cR } = this;
+            while (!n && cR) {
+                n = cR.Fst;
+                cR = cR.nx;
+            }
+            return n;
+        }
+    }
+    get Nxt() {
+        let r = this, n, p;
+        do {
+            p = r.PR;
+            while (r = r.nx)
+                if (n = r.Fst)
+                    return n;
+            r = p;
+        } while (r && !r.n);
+    }
+    get FstOrNxt() {
+        return this.Fst || this.Nxt;
+    }
+    Nodes() {
+        return (function* Nodes(r) {
+            let c;
+            if (r.n)
+                yield r.n;
+            else if (c = r.cR)
+                do {
+                    yield* Nodes(c);
+                } while (c = c.nx);
+        })(this);
+    }
+    erase(par) {
+        let { n, cR } = this, p = !n && par;
+        this.cR = this.n = N;
+        while (cR) {
+            cR.bD?.call(cR.n ?? p);
+            cR.rvars?.forEach(rv => rv.$subr.delete(cR));
+            cR.erase(cR.PN ?? p);
+            cR.aD?.call(cR.n ?? p);
+            cR.n = U;
+            cR = cR.nx;
+        }
+        if (n && par)
+            par.removeChild(n);
+    }
+    update() {
+        let b, bR;
+        ({ b, bR, env, oes, PN } = this.uInfo);
+        return b({ r: this, PN, PR: this.PR }, bR);
+    }
+}
+const PrepRng = (ar, srcE, text = Q, nWipe, res) => {
+    let { PN, r } = ar, sub = { PN }, cr;
+    if (cr = !r) {
+        sub.srcN = ar.srcN;
+        sub.bfor = ar.bfor;
+        r = sub.PR = new Range(ar, N, srcE ? srcE.tagName + (text && ' ' + text) : text);
+        if (ar.srcN && nWipe)
+            ar.srcN.remove();
+    }
+    else {
+        sub.r = r.cR || T;
+        ar.r = r.nx || T;
+        if (cr = nWipe && (nWipe > 1 || res != r.res)) {
+            (sub.PR = r).erase(PN);
+            sub.r = N;
+            sub.bfor = r.Nxt;
+        }
+    }
+    r.res = res;
+    return { r, sub, cr };
+}, PrepElm = (a, tag) => {
+    let r = a.r, cr = !r;
+    if (cr)
+        r = new Range(a, a.srcN
+            || a.PN.insertBefore(D.createElement(tag), a.bfor));
+    else
+        a.r = r.nx || T;
+    nodeCnt++;
+    return {
+        r,
+        sub: {
+            PN: PN = r.n,
+            r: r.cR,
+            bfor: N,
+            PR: r
+        },
+        cr
+    };
+}, PrepData = (a, s, bC) => {
+    let r = a.r;
+    if (!r)
+        r = new Range(a, PN.insertBefore(bC ? D.createComment(s) : D.createTextNode(s), a.bfor));
+    else {
+        r.n.data = s;
+        a.r = r.nx || T;
+    }
+    nodeCnt++;
+    return r;
+};
+class Signat {
+    constructor(srcE, RC) {
+        ass(this, { nm: srcE.tagName,
+            srcE, RC,
+            Pams: [],
+            Slots: new Map
+        });
+        for (let attr of srcE.attributes) {
+            let [a, m, rp, dum, nm, on, q] = /^(#|@|(\.\.\.)|(_)|)((on)?.*?)(\?)?$/.exec(attr.name), v = attr.value;
+            if (!dum) {
+                if (this.RP)
+                    throw `Rest parameter must be last`;
+                nm || rp
+                    || thro('Empty parameter name');
+                let pDf = v ? m ? RC.CExpr(v, a) : RC.CText(v, a)
+                    : on && K(dU);
+                this.Pams.push({
+                    mode: m,
+                    nm,
+                    rq: !(q || pDf || rp),
+                    pDf: m == '@' ? () => RVAR(U, pDf?.()) : pDf
+                });
+                this.RP = rp && nm;
+            }
+        }
+        let { ct } = RC.CT, s;
+        RC.CT.ct = Q;
+        try {
+            for (let eSlot of srcE.children) {
+                mapNm(this.Slots, s = new Signat(eSlot, RC));
+                if (/^CONTENT/.test(s.nm))
+                    this.CSlot ? thro('Multiple content slots')
+                        : this.CSlot = s;
+            }
+        }
+        finally {
+            RC.CT.ct = ct;
+        }
+    }
+    IsCompat(sig) {
+        if (sig) {
+            let c = T, mP = new Map(map(sig.Pams, p => [p.nm, p])), p;
+            for (let { nm, rq } of this.Pams)
+                if (c && (c = p = mP.get(nm))) {
+                    c && (c = rq || !p.rq);
+                    mP.delete(nm);
+                }
+            for (let p of mP.values())
+                c && (c = !p.rq);
+            for (let [nm, slotSig] of this.Slots)
+                c && (c = sig.Slots.get(nm)?.IsCompat(slotSig));
+            return c;
+        }
+    }
+}
+export class RV {
+    constructor(n, t) {
+        this.$V = U;
+        this.$C = 0;
+        this.$up = 0;
+        this.$imm = U;
+        this.$subs = U;
+        this.$subr = new Set;
+        this.Set = t => {
+            if (t instanceof Promise) {
+                this.V = U;
+                let c = this.$C;
+                t.then(v => this.$C == c && (this.V = v), oes.e);
+            }
+            else
+                this.V = t;
+        };
+        this.$name = n;
+        if (t instanceof Promise)
+            this.Set(t);
+        else if (t instanceof Function) {
+            let j = () => this.Set(t()), s = arV;
+            arV = new Map;
+            j();
+            for (let rv of arV.keys())
+                rv.Subscribe(() => AJ(j));
+            arV = s;
+        }
+        else
+            this.$V = t;
+    }
+    get V() {
+        AR(this);
+        return this.$V;
+    }
+    set V(v) {
+        this.$C++;
+        this.$up = upd;
+        let p = this.$V;
+        this.$V = v;
+        v === p || this.SetDirty(p);
+    }
+    Subscribe(s, bImm, cr) {
+        if (s) {
+            if (cr)
+                s(this.$V);
+            (bImm ? this.$imm || (this.$imm = new Set) : this.$subs || (this.$subs = new Set)).add(s);
+        }
+        return this;
+    }
+    Unsubscribe(s) {
+        this.$imm?.delete(s);
+        this.$subs?.delete(s);
+    }
+    $SR({ PN }, b, r, bR = true) {
+        r.uInfo || (r.uInfo = { b, env, oes, PN, bR });
+        this.$subr.add(r);
+        (r.rvars || (r.rvars = new Set)).add(this);
+    }
+    $UR(r) {
+        this.$subr.delete(r);
+        r.rvars.delete(this);
+    }
+    get Clear() {
+        return () => {
+            if (upd > this.$up)
+                this.V = U;
+        };
+    }
+    get U() {
+        ro ? AR(this) : this.SetDirty();
+        return this.$V;
+    }
+    set U(t) { this.$V = t; this.SetDirty(); }
+    SetDirty(prev) {
+        this.$imm?.forEach(s => s(this.$V, prev));
+        this.$subr.forEach(AJ);
+        if (this.$subs)
+            AJ(this.ex || (this.ex = async () => {
+                for (let s of this.$subs)
+                    try {
+                        s(this.$V);
+                    }
+                    catch (e) {
+                        console.log(e = 'ERROR: ' + Abbr(e, 1000));
+                        alert(e);
+                    }
+            }));
+    }
+    valueOf() { return this.V?.valueOf(); }
+    toString() { return this.V?.toString() ?? Q; }
+}
+const ProxH = {
+    get(rv, p) {
+        if (p in rv)
+            return rv[p];
+        let ob = rv.V, v = ob?.[p];
+        return v instanceof Function ? v.bind(ob) : v;
+    },
+    set(rv, p, v) {
+        if (p in rv)
+            rv[p] = v;
+        else if (v !== rv.$V[p])
+            rv.U[p] = v;
+        return T;
+    },
+    deleteProperty(rv, p) {
+        return p in rv.$V ? delete rv.U[p] : T;
+    },
+    has(rv, p) {
+        return p in rv || rv.V != N && p in rv.$V;
+    }
+};
+export function RVAR(nm, val, store, imm, storeNm, updTo) {
+    if (store) {
+        var sNm = storeNm || 'RVAR_' + nm, s = store.getItem(sNm);
+        if (s)
+            try {
+                val = JSON.parse(s);
+            }
+            catch { }
+    }
+    let rv = new RV(nm || storeNm, val).Subscribe(imm, T);
+    store &&
+        rv.Subscribe(v => store.setItem(sNm, JSON.stringify(v ?? N)));
+    updTo &&
+        rv.Subscribe(() => updTo.SetDirty(), T);
+    rv = new Proxy(rv, ProxH);
+    if (nm)
+        G[nm] = rv;
+    return rv;
+}
+let env, oes = {}, PN, Jobs = new Set, hUpd, ro = F, upd = 0, nodeCnt = 0, start, arV, arA, arR, arB;
+const AR = (rv, bA) => arV
+    && (bA || !arV.has(rv))
+    && arV.set(rv, bA), arChk = () => {
+    if (arV?.size && (arR || (arR = arA.pR))) {
+        arV.forEach((bA, rv) => arR.uv?.delete(rv) || rv.$SR(arA, arB, arR, !bA));
+        arR.uv?.forEach((_, rv) => rv.$UR(arR));
+        arR.uv = arV;
+    }
+    arV = N;
+}, chWins = new Set, OMods = new Map, NoTime = (prom) => {
+    let t = now();
+    return prom.finally(() => start += now() - t);
+}, AJ = (job) => {
+    Jobs.add(job);
+    hUpd || (hUpd = setTimeout(DoUpdate, 1));
+};
+let evM = (M) => {
+    let v = M.d();
+    if (v instanceof RV) {
+        if (M.T)
+            M.T.d = K(v.Set);
+        v = v.V;
+    }
+    return v;
+};
+class Hndlr {
+    constructor() {
+        this.oes = oes;
+    }
+    handleEvent(ev, ...r) {
+        if (this.h)
+            try {
+                var { e, s } = this.oes, v = this.h.call(ev?.currentTarget, ev, ...r);
+                v === false && ev.preventDefault();
+                v instanceof Promise
+                    ? v.then(_ => s?.(ev), e)
+                    : s?.(ev);
+            }
+            catch (er) {
+                (e || thro)(er);
+            }
+    }
+}
+class Targ {
+    constructor(nm) {
+        this.nm = nm;
+    }
+    handleEvent(ev) {
+        this.S(ev.currentTarget[this.c || (this.c = ChkNm(ev.currentTarget, this.nm))]);
+    }
+}
+function ApplyAtts(r, cr, ms, k = 0, xs) {
+    ro = T;
+    let e = r.n, cu = cr ? 1 : 2, hc, i = 0;
+    try {
+        for (let M of ms) {
+            if (M.cu & cu) {
+                let nm = M.nm, x = xs ? xs[i] : evM(M);
+                switch (M.mt) {
+                    case 0:
+                        e.setAttribute(nm, x);
+                        break;
+                    case 1:
+                        if (M.isS ?? (M.isS = isS(e[M.c = ChkNm(e, nm == 'for' ? 'htmlFor'
+                            : nm == 'valueasnumber' ? 'value'
+                                : nm)])))
+                            x = x == N || x != x ? Q : x.toString();
+                        if (x != e[nm = M.c])
+                            e[nm] = x;
+                        break;
+                    case 8:
+                        cr &&
+                            EL(e, M.ev, (r[k] = new Targ(nm)));
+                        r[k].S = x;
+                        break;
+                    case 7:
+                        cr &&
+                            EL(e, nm, r[k] = new Hndlr);
+                        r[k].h = x;
+                        if (M.ap)
+                            hc || (hc = x);
+                        break;
+                    case 4:
+                        if (x)
+                            isS(x) ? (e.style = x) : ass(e.style, x);
+                        break;
+                    case 2:
+                        e.style[M.c || (M.c = ChkNm(e.style, nm))] = x || x === 0 ? x : Q;
+                        break;
+                    case 6:
+                        e[nm] = x.replace(M.ev ? /(.+?)(,|$)/gs : /(.+)()/s, (_, u, r) => new URL(u, M.fp).href + r);
+                        break;
+                    case 5:
+                        ass(e, x);
+                        break;
+                    case 3:
+                        let p = r[k], n = M.cu & 2 ? (r[k] = new Set) : N;
+                        (function AC(x) {
+                            if (x)
+                                switch (typeof x) {
+                                    default: throw `Invalid value`;
+                                    case 'string':
+                                        for (let C of x.split(/\s+/))
+                                            if (C) {
+                                                p?.delete(C)
+                                                    || e.classList.add(C);
+                                                n?.add(C);
+                                            }
+                                        break;
+                                    case 'object':
+                                        if (Array.isArray(x))
+                                            x.forEach(AC);
+                                        else
+                                            for (let [nm, b] of Object.entries(x))
+                                                b && AC(nm);
+                                }
+                        })(x);
+                        if (p)
+                            for (let v of p)
+                                e.classList.remove(v);
+                        break;
+                    case 9:
+                        if (x)
+                            k = ApplyAtts(r, cr, x.ms, k, x.xs);
+                        break;
+                    case 10:
+                        x(nm ? e[M.c || (M.c = ChkNm(e, nm))] : e);
+                        break;
+                    case 11:
+                        if (!e.download
+                            && !e.target
+                            && e.href.startsWith(L.origin + dL.basepath))
+                            EL(e, 'click', reroute);
+                }
+            }
+            i++;
+            k++;
+        }
+    }
+    finally {
+        ro = F;
+    }
+    if (hc !== U)
+        e.style.cursor = hc && !e.disabled ? 'pointer' : Q;
+    return k;
+}
+let iRC = 0, iLS = 0, rIS = [];
+class RComp {
+    constructor(RC, SRC, S, CT = RC?.CT) {
+        ass(this, { num: iRC++,
+            S: addS(RC ? RC.S : dflts, S),
+            src: SRC || RC?.src,
+            doc: RC?.doc || D,
+            CT: new Context(CT, CT),
+            lscl: RC?.lscl || E,
+            ndcl: RC?.ndcl || 0,
+            rActs: [],
+            sPRE: new Set(['PRE']),
+            ws: 1,
+            rt: T
+        });
+        this.fp = this.src?.replace(/[^/]*$/, Q);
+        this.hd = RC?.hd || this.doc.head;
+    }
+    Framed(Comp) {
+        let { CT, rActs } = this, { ct, d, L, M } = CT, A = rActs.length, nf = L - M;
+        if (nf) {
+            CT.ct = `[${ct}]`;
+            CT.d++;
+            CT.L = CT.M = 0;
+        }
+        return Comp((sub, r) => {
+            let e = env;
+            r || ({ r, sub } = PrepRng(sub));
+            env = r.env || (r.env = ass([nf ? e : e[0]], { cl: e.cl }));
+            return { sub, EF: () => env = e };
+        }).finally(() => {
+            this.CT = ass(CT, { ct, d, L, M });
+            while (rActs.length > A)
+                rActs.pop()();
+        });
+    }
+    SS() {
+        let { CT, rActs } = this, { ct, L } = CT, A = rActs.length;
+        return () => {
+            CT.ct = ct
+                + ','.repeat(CT.L - L);
+            while (rActs.length > A)
+                rActs.pop()();
+        };
+    }
+    LV(nm) {
+        if (nm = nm?.trim()) {
+            try {
+                /^[A-Z_$][A-Z0-9_$]*$/i.test(nm) || thro();
+                V(`let ${nm}=0`);
+            }
+            catch {
+                throw `Invalid identifier '${nm}'`;
+            }
+            let { CT } = this, i = ++CT.L, vM = CT.lvM, p = vM.get(nm);
+            vM.set(nm, { d: CT.d, i });
+            this.rActs.push(() => mapSet(vM, nm, p));
+            CT.ct = CT.ct.replace(new RegExp(`\\b${nm}\\b`), Q)
+                + ',' + nm;
+            var lv = (v => env[i] = v);
+        }
+        else
+            lv = dU;
+        lv.nm = nm;
+        return lv;
+    }
+    LVars(varlist) {
+        return Array.from(split(varlist), nm => this.LV(nm));
+    }
+    LCons(listS) {
+        let { CT } = this, { csM: cM, M, d } = CT;
+        for (let S of listS) {
+            let m = S.nm, p = cM.get(m);
+            cM.set(m, { S, k: { d, i: --CT.M } });
+            this.rActs.push(() => mapSet(cM, m, p));
+        }
+        return (CDefs) => {
+            let i = M;
+            for (let C of CDefs)
+                env[--i] = C;
+        };
+    }
+    async Compile(elm, nodes) {
+        for (let tag of this.S.preformatted)
+            this.sPRE.add(tU(tag));
+        this.srcCnt = 0;
+        let t0 = now(), b = (nodes
+            ? await this.CIter(nodes)
+            : await this.CElm(elm, T)) || dB;
+        this.log(`Compiled ${this.srcCnt} nodes in ${(now() - t0).toFixed(1)} ms`);
+        return this.bldr = async (a, bR) => {
+            let S = oes.t;
+            oes.t = this.S;
+            try {
+                await b(a, bR);
+            }
+            finally {
+                oes.t = S;
+            }
+        };
+    }
+    log(msg) {
+        if (this.S.bTiming)
+            console.log(new Date().toISOString().substring(11) + ` ${this.num}: ` + msg);
+    }
+    async Build(a) {
+        R = this;
+        env = [];
+        PN = a.PN;
+        try {
+            await this.bldr(a);
+        }
+        finally {
+            env = U;
+        }
+    }
+    async CChilds(PN, nodes = PN.childNodes) {
+        let ES = this.SS();
+        try {
+            return await this.CIter(nodes);
+        }
+        finally {
+            ES();
+        }
+    }
+    async CIter(iter) {
+        let { rt } = this, arr = Array.from(iter), L = arr.length, bs = [], i = 0;
+        while (rt && L && !/[^ \t\n\r]/.test(arr[L - 1]?.nodeValue))
+            L--;
+        while (i < L) {
+            let srcN = arr[i++], bl, bC;
+            this.rt = i == L && rt;
+            switch (srcN.nodeType) {
+                case 1:
+                    this.srcCnt++;
+                    bl = await this.CElm(srcN);
+                    break;
+                case 8:
+                    if (!this.S.bKeepComments)
+                        break;
+                    bC = T;
+                case 3:
+                    this.srcCnt++;
+                    let str = srcN.nodeValue, dText = this.CText(str), x = dText.fx;
+                    if (x ?? T) {
+                        bl = x ? a => PrepData(a, x, bC)
+                            : this.ErrH(a => PrepData(a, dText(), bC));
+                        if (!bC && this.ws < 4)
+                            this.ws = / $/.test(str) ? 2 : 3;
+                    }
+            }
+            if (bl)
+                bs.push(bl);
+        }
+        return (L = bs.length) > 1 ?
+            async function Iter(a) {
+                for (let b of bs)
+                    await b(a);
+            }
+            : L ? bs[0]
+                : N;
+    }
+    async CElm(srcE, bI) {
+        let RC = this, tag = srcE.tagName, ats = new Atts(srcE), ga = [], bf = [], af = [], bl, bA, constr = RC.CT.getCS(tag), b, m, nm, ws = RC.ws, S = this.S;
+        try {
+            for (let [at] of ats)
+                if (m =
+                    /^#?(?:(((this)?reacts?on|(on))|(on(error|success)|rhtml)|(hash)|(if|(intl))|renew)|(?:(before)|on|after)(?:create|update|destroy|compile)+)$/
+                        .exec(at))
+                    if (m[1])
+                        m[4] && tag != 'REACT'
+                            || m[7] && tag == 'FOR'
+                            || ga.push({
+                                at,
+                                m,
+                                dV: m[6]
+                                    ? RC.CHandlr(ats.g(at), at)
+                                    : m[5] ?
+                                        K(this.S = addS(S, ats.g(at)))
+                                        : m[8]
+                                            ? RC.CAttExp(ats, at)
+                                            :
+                                                RC.CAttExps(ats, at)
+                            });
+                    else {
+                        let txt = ats.g(at);
+                        if (/cr|d/.test(at))
+                            (m[10] ? bf : af)
+                                .push({
+                                at,
+                                txt,
+                                C: /cr/.test(at),
+                                U: /u/.test(at),
+                                D: /y/.test(at),
+                                h: m[10] && RC.CHandlr(txt, at)
+                            });
+                        if (/mp/.test(at))
+                            TryV(`(function(){${txt}\n})`, at).call(srcE);
+                    }
+            if (constr)
+                bl = await RC.CInst(srcE, ats, constr);
+            else
+                switch (tag) {
+                    case 'DEF':
+                    case 'DEFINE': {
+                        NoChilds(srcE);
+                        let rv = ats.g('rvar'), vLet = RC.LV(rv || ats.g('let') || ats.g('var', T)), { G, S } = RC.cAny(ats, 'value'), bU = ats.gB('updating') || rv, dUpd = rv && RC.CAttExp(ats, 'updates', F, F), onM = rv && RC.CPam(ats, 'onmodified'), dSto = rv && RC.CAttExp(ats, 'store'), dSNm = dSto && RC.CPam(ats, 'storename');
+                        bA = function DEF(a, bR) {
+                            let { cr, r } = PrepRng(a, srcE), v;
+                            if (bU || arChk() || cr || bR != N) {
+                                ro = T;
+                                try {
+                                    v = G?.();
+                                }
+                                finally {
+                                    ro = F;
+                                }
+                                if (rv) {
+                                    if (onM)
+                                        (r.om || (r.om = new Hndlr)).h = onM();
+                                    if (cr) {
+                                        vLet(r.rv =
+                                            RVAR(U, dr(v), dSto?.(), S?.(), dSNm?.() || rv, dUpd?.()));
+                                        onM && r.rv.Subscribe((x) => r.om.handleEvent(x));
+                                    }
+                                    else
+                                        r.rv.Set(dr(v));
+                                }
+                                else
+                                    vLet(v);
+                            }
+                        };
+                        break;
+                    }
+                    case 'IF':
+                    case 'CASE':
+                        bl = await RC.CCase(srcE, ats);
+                        break;
+                    case 'FOR':
+                        bl = await RC.CFor(srcE, ats);
+                        break;
+                    case 'MODULE':
+                        ats.g('id');
+                        break;
+                    case 'INCLUDE':
+                        bl = await RC.CIncl(srcE, ats, T);
+                        break;
+                    case 'IMPORT': {
+                        let src = ats.src(T), bIncl = ats.gB('include'), bAsync = ats.gB('async'), lvars = RC.LVars(ats.g('defines')), imps = Array.from(map(srcE.children, cR => new Signat(cR, RC))), DC = RC.LCons(imps), cTask = OMods.get(src);
+                        if (!cTask) {
+                            let C = new RComp(RC, RC.gURL(src), { bSubf: T }, new Context);
+                            C.log(src);
+                            cTask =
+                                RC.fetchM(src)
+                                    .then(iter => C.Compile(N, iter))
+                                    .then(b => [b, C.CT]);
+                            if (RC.S.bSubf != 2)
+                                OMods.set(src, cTask);
+                        }
+                        let task = cTask.then(([b, CT]) => {
+                            for (let sig of imps) {
+                                let { S, dC } = CT.getCS(sig.nm)
+                                    || thro(`<${sig.nm}> is missing in '${src}'`);
+                                bAsync
+                                    ? !sig.IsCompat(S) && thro(`Import signature ${sig.srcE.outerHTML} is incompatible with module signature ${S.srcE.outerHTML}`)
+                                    : ass(sig, S);
+                                sig.g = dC;
+                            }
+                            for (let lv of lvars)
+                                lv.g = CT.getLV(lv.nm);
+                            return b;
+                        });
+                        if (!bAsync)
+                            for (let sig of imps)
+                                sig.task = task;
+                        bA = async function IMPORT(a) {
+                            let { sub, cr, r } = PrepRng(a, srcE);
+                            arV = N;
+                            if (cr || bIncl) {
+                                try {
+                                    var b = await NoTime(task), s = env, MEnv = env = r.v || (r.v = []);
+                                    await b(bIncl ? sub : { PN: D.createDocumentFragment() });
+                                }
+                                finally {
+                                    env = s;
+                                }
+                                DC(map(imps, S => S.g(MEnv)));
+                                for (let lv of lvars)
+                                    lv(lv.g(MEnv));
+                            }
+                        };
+                        break;
+                    }
+                    case 'REACT':
+                        b = await RC.CChilds(srcE);
+                        bl = b && function (a, bR) {
+                            return !(a.r && bR) && b(a);
+                        };
+                        break;
+                    case 'RHTML': {
+                        let S = RC.CPam(ats, 'srctext', T), onc = RC.CPam(ats, "onc"), s = { bSubf: 2, bTiming: RC.S.bTiming };
+                        NoChilds(srcE);
+                        bl = async function RHTML(a) {
+                            let { r } = PrepElm(a, 'r-html'), src = S();
+                            if (src != r.src) {
+                                let sv = env, C = new RComp(N, dL.href, s), sh = C.hd = r.n.shadowRoot || r.n.attachShadow({ mode: 'open' }), PR = r.rR || (r.rR = new Range(N, N, tag)), tmp = D.createElement(tag);
+                                (C.doc = D.createDocumentFragment()).appendChild(tmp);
+                                try {
+                                    tmp.innerHTML = r.src = src;
+                                    C.ws = ws;
+                                    await C.Compile(tmp, tmp.childNodes);
+                                    onc && onc()(U);
+                                    PR.erase(sh);
+                                    await C.Build({ PN: sh, PR });
+                                }
+                                catch (e) {
+                                    sh.appendChild(crErrN(e));
+                                }
+                                finally {
+                                    env = sv;
+                                }
+                            }
+                        };
+                        break;
+                    }
+                    case 'SCRIPT':
+                        bA = await RC.CScript(srcE, ats);
+                        break;
+                    case 'COMPONENT':
+                        bA = await RC.CComp(srcE, ats);
+                        break;
+                    case 'DOCUMENT':
+                        let vNm = RC.LV(ats.g('name', T));
+                        bA = await RC.Framed(async (SF) => {
+                            let bEncaps = ats.gB('encapsulate'), C = new RComp(RC), vPams = C.LVars(ats.g('params')), vWin = C.LV(ats.g('window', F, F, T)), H = C.hd = D.createDocumentFragment(), b = await C.CChilds(srcE);
+                            return function DOCUMENT(a) {
+                                if (PrepRng(a).cr) {
+                                    let { doc, hd } = RC, docEnv = env, wins = new Set;
+                                    vNm({
+                                        async render(w, cr, args) {
+                                            let s = env, Cdoc = C.doc = w.document;
+                                            C.hd = Cdoc.head;
+                                            env = docEnv;
+                                            let { sub } = SF({ PN: Cdoc.body });
+                                            SetLVs(vPams, args);
+                                            vWin(w);
+                                            try {
+                                                if (cr) {
+                                                    if (!bEncaps)
+                                                        for (let SSh of hd.styleSheets || doc.styleSheets) {
+                                                            let DSh = Cdoc.head.appendChild(D.createElement('style')).sheet;
+                                                            for (let rule of SSh.cssRules)
+                                                                DSh.insertRule(rule.cssText);
+                                                        }
+                                                    for (let S of H.childNodes)
+                                                        Cdoc.head.append(S.cloneNode(T));
+                                                }
+                                                await b(sub);
+                                            }
+                                            finally {
+                                                env = s;
+                                            }
+                                        },
+                                        open(target, features, ...args) {
+                                            let w = W.open(Q, target || Q, features), cr = !chWins.has(w);
+                                            if (cr) {
+                                                EL(w, 'keydown', (ev) => ev.key == 'Escape' && w.close());
+                                                EL(w, 'close', _ => { chWins.delete(w); wins.delete(w); });
+                                                chWins.add(w);
+                                                wins.add(w);
+                                            }
+                                            w.document.body.innerHTML = Q;
+                                            this.render(w, cr, args);
+                                            return w;
+                                        },
+                                        async print(...args) {
+                                            let f = D.createElement('iframe');
+                                            f.hidden = T;
+                                            D.body.appendChild(f);
+                                            await this.render(f.contentWindow, T, args);
+                                            f.contentWindow.print();
+                                            f.remove();
+                                        },
+                                        closeAll: () => wins.forEach(w => w.close())
+                                    });
+                                }
+                            };
+                        });
+                        break;
+                    case 'RHEAD':
+                        RC.ws = RC.rt = 1;
+                        bl = await RC.CUncN(srcE, U, RC.hd);
+                        RC.ws = ws;
+                        break;
+                    case 'STYLE': {
+                        let src = ats.src(), sc = ats.g('scope'), nm, { lscl: l, hd } = RC;
+                        if (sc) {
+                            /^local$/i.test(sc) || thro('Invalid scope');
+                            nm = `\uFFFE${iLS++}`;
+                            RC.lscl = [...l, nm];
+                            RC.rActs.push(() => RC.lscl = l);
+                        }
+                        (src ? RC.FetchT(src) : Promise.resolve(srcE.innerText))
+                            .then(txt => {
+                            srcE.innerHTML = RC.AddC(txt, nm, src);
+                            hd.appendChild(srcE);
+                        });
+                        ats.clear();
+                        break;
+                    }
+                    case 'RSTYLE': {
+                        let bd = RC.S[bD], sc = ats.g('scope'), { bf, af } = RC.CAtts(ats), i;
+                        try {
+                            RC.S[bD] = T;
+                            RC.ws = 1;
+                            let b = await (sc ?
+                                (/^local$/i.test(sc) || thro('Invalid scope')
+                                    , (i = RC.ndcl++)
+                                    , RC.rActs.push(() => RC.ndcl--)
+                                    , RC.CUncN(srcE, ats))
+                                : RC.CIncl(srcE, ats));
+                            bl = b && async function RSTYLE(a) {
+                                let { r, cr, sub } = PrepElm(a, 'STYLE'), k = ApplyAtts(r, cr, bf);
+                                if (sc) {
+                                    let txt = (await b(a)).innerText, nm = r.cn || (r.cn = `\uFFFE${iLS++}`);
+                                    if (txt != r.tx)
+                                        r.n.innerHTML = RC.AddC(r.tx = txt, nm);
+                                    (env.cl = r.cl || (r.cl = [...env.cl || E]))[i] = nm;
+                                }
+                                else
+                                    await b(sub);
+                                ApplyAtts(r, cr, af, k);
+                            };
+                        }
+                        finally {
+                            RC.S[bD] = bd;
+                            RC.ws = ws;
+                        }
+                        break;
+                    }
+                    case 'ELEMENT':
+                        bl = await RC.CHTML(srcE, ats, RC.CPam(ats, 'tagname', T));
+                        RC.ws = 3;
+                        break;
+                    case 'ATTRIBUTE':
+                        NoChilds(srcE);
+                        let dN = RC.CPam(ats, 'name', T), dV = RC.CPam(ats, 'value', T);
+                        bl = function ATTRIB(a) {
+                            let { r, cr } = PrepRng(a, srcE), nm = dN();
+                            if (cr)
+                                r.aD = () => PN.removeAttribute(r.v);
+                            if (r.v && nm != r.v)
+                                r.aD();
+                            if (r.v = nm)
+                                PN.setAttribute(nm, dV());
+                        };
+                        break;
+                    case 'COMMENT':
+                        RC.rt = F;
+                        RC.ws = 4;
+                        let c = await RC.CUncN(srcE);
+                        bl = async function COMMENT(a) {
+                            PrepData(a, (await c(a)).innerText, T);
+                        };
+                        RC.ws = ws;
+                        break;
+                    default:
+                        bl = await RC.CHTML(srcE, ats);
+                }
+            bI || ats.None();
+            nm = (bl || (bl = bA || (bA = dB))).name;
+            if (bf.length || af.length) {
+                for (let g of af)
+                    g.h = RC.CHandlr(g.txt, g.at);
+                let b = bl;
+                bl = async function Pseu(a, bR) {
+                    let { r, sub, cr } = PrepRng(a, srcE), sr = sub.r || T, bD = ph(bf, 'bU', sr != T && sr.n || PN);
+                    await b(sub, bR);
+                    let rng = cr
+                        ? sub.pR
+                        : sr, aD = ph(af, 'aU', rng.n || PN);
+                    if (cr)
+                        ass(rng, { bD, aD });
+                    function ph(hh, U, elm) {
+                        if (cr) {
+                            for (let g of hh) {
+                                let h = g.h();
+                                if (g.C)
+                                    h.call(elm);
+                                if (g.U)
+                                    r[U] = h;
+                                if (g.D)
+                                    var D = h;
+                            }
+                            return D;
+                        }
+                        r[U]?.call(elm);
+                    }
+                };
+            }
+            for (let { at, m, dV } of RC.S.version ? ga : ga.reverse()) {
+                let b = bl, es = (m[5] || m[9])?.[2], bA = !m[3];
+                if (m[2])
+                    bl = RC.ErrH((a, bR) => {
+                        for (let rv of dV())
+                            if (rv)
+                                rv.$SR ? AR(rv, bA) : thro(`This is not an RVAR\nat '${at}'`);
+                        return b(PrepRng(a, srcE).sub, bR);
+                    }, srcE);
+                else
+                    bl =
+                        es
+                            ? async function SetOES(a, bR) {
+                                let s = oes, { sub, r } = PrepRng(a, srcE, at);
+                                oes = ass(r.oes || (r.oes = {}), oes);
+                                try {
+                                    if (es == 't')
+                                        oes[es] = addS(oes[es], dV());
+                                    else
+                                        oes[es] = dV();
+                                    await b(sub, bR);
+                                }
+                                finally {
+                                    oes = s;
+                                }
+                            }
+                            : m[7]
+                                ? (a, bR) => {
+                                    let { sub, r, cr } = PrepRng(a, srcE, at), ph = r.v;
+                                    r.v = dV();
+                                    if (cr || r.v.some((hash, i) => hash !== ph[i]))
+                                        return b(sub, bR);
+                                }
+                                : m[8]
+                                    ? function hIf(a, bR) {
+                                        let c = dV(), p = PrepRng(a, srcE, at, 1, !c);
+                                        if (c)
+                                            return b(p.sub, bR);
+                                    }
+                                    :
+                                        (sub, bR) => b(PrepRng(sub, srcE, at, 2).sub, bR);
+            }
+            return bl != dB && ass(RC.ErrH(bl, srcE, bA), { nm });
+        }
+        catch (m) {
+            throw ErrM(srcE, m);
+        }
+        finally {
+            this.S = S;
+        }
+    }
+    ErrH(b, srcN, bA) {
+        let bl = b && (async (a, bR) => {
+            let r = a.r;
+            if (r?.eN) {
+                PN.removeChild(r.eN);
+                r.eN = U;
+            }
+            try {
+                arV && arChk();
+                arR = a.r;
+                arB = bl;
+                arV = new Map;
+                let prom = b(arA = a, bR);
+                arChk();
+                await prom;
+            }
+            catch (m) {
+                arChk();
+                if (m) {
+                    let msg = srcN instanceof HTMLElement ? ErrM(srcN, m, 45) : m, e = oes.e;
+                    this.S.bAbortOnError && thro(msg);
+                    this.log(msg);
+                    e ? e(msg)
+                        : this.S.bShowErrors ?
+                            (r || {}).eN = a.PN.insertBefore(crErrN(msg), a.r?.FstOrNxt)
+                            : U;
+                    bA && thro(Q);
+                }
+            }
+            PN = a.PN;
+        });
+        return bl;
+    }
+    CIncl(srcE, ats, bR, cn = srcE.childNodes) {
+        let src = ats?.src(bR);
+        return src ?
+            this.Framed(async (SF) => {
+                let C = new RComp(this, this.gURL(src), { bSubf: T }), task = srcE.children.length || srcE.textContent.trim()
+                    ? C.Compile(N, cn)
+                    : this.fetchM(src).then(cn => C.Compile(N, cn));
+                return async function INCL(a) {
+                    PrepRng(a, srcE);
+                    arChk();
+                    let { sub, EF } = SF(a);
+                    try {
+                        await (await NoTime(task))(sub);
+                    }
+                    finally {
+                        EF();
+                    }
+                };
+            })
+            : this.CChilds(srcE, cn);
+    }
+    async CUncN(srcE, ats, p = F) {
+        let b = await this.CIncl(srcE, ats);
+        return b && (async (a) => {
+            let { r, sub } = PrepRng(a, srcE);
+            PN = sub.PN = r.p || (r.p = (r.PN = p) || D.createElement(srcE.tagName));
+            sub.bfor = N;
+            try {
+                await b(sub);
+            }
+            finally {
+                PN = a.PN;
+            }
+            return !p && r.p;
+        });
+    }
+    async CScript(srcE, ats) {
+        let { type, text, defer, async } = srcE, src = ats.src(), defs = ats.g('defines') || '', m = /^\s*(((text|application)\/javascript|(module)|)|(otoreact)(\/(((local)|static)|global)|(.*?)))\s*(;\s*type\s*=\s*(")?module\12)?\s*$|/i.exec(type), bU = ats.gB('updating'), { ct } = this.CT, lvars = m[8] && this.LVars(defs), ex;
+        ats.clear();
+        if (m[5]
+            && (!(m[10] || m[9] && m[11]) || thro("Invalid script type"))
+            || m[2] != N && this.S.bSubf) {
+            if (m[9]) {
+                let prom = (async () => V(US + `(function([${ct}]){{${src ? await this.FetchT(src) : text}\nreturn{${defs}}}})`))();
+                ex = () => prom.then(f => f(env));
+            }
+            else if (m[4] || m[11])
+                ex = K(src
+                    ? import(this.gURL(src))
+                    : import(src = URL.createObjectURL(new Blob([text.replace(/\/\/.*|\/\*[^]*?\*\/|(['"`])(?:\\.|[^])*?\1|(\bimport\b(?:(?:[a-zA-Z0-9_,*{}]|\s)*\bfrom)?\s*(['"]))(.*?)\3/g, (p0, _, p2, p3, p4) => p2 ? p2 + this.gURL(p4) + p3 : p0)], { type: 'text/javascript' }))).finally(() => URL.revokeObjectURL(src)));
+            else {
+                let pTxt = (async () => `${m[5] ? US : Q}${src ? await this.FetchT(src) : text}\n;({${defs}})`)(), Xs;
+                ex = async () => Xs || (Xs = V(await pTxt));
+                if (src && async)
+                    ex();
+                else if (!m[5] && !defer)
+                    await ex();
+            }
+            return async function SCRIPT(a) {
+                PrepRng(a, srcE);
+                if (bU || arChk() || !a.r) {
+                    let obj = await ex();
+                    if (lvars)
+                        lvars.forEach(lv => lv(obj[lv.nm]));
+                    else
+                        ass(G, obj);
+                }
+            };
+        }
+    }
+    async CCase(srcE, ats) {
+        let bH = ats.gB('hiding'), dV = this.CAttExp(ats, 'value'), cases = [], body = [], bI = srcE.tagName == 'IF', bT, bE;
+        for (let n of srcE.childNodes) {
+            if (n instanceof HTMLElement)
+                switch (n.tagName) {
+                    case 'THEN':
+                        bT = cases.push({ n, ats });
+                        new Atts(n).None();
+                        continue;
+                    case 'ELSE':
+                        bE && thro("Double <ELSE>");
+                        bE = T;
+                    case 'WHEN':
+                        bE || bI && thro("<IF> contains <WHEN>");
+                        cases.push({ n, ats: new Atts(n) });
+                        continue;
+                }
+            body.push(n);
+        }
+        bI && !bT
+            ? cases.unshift({ n: srcE, ats, body })
+            : NoChilds(srcE, body);
+        let aList = [], { ws, rt, CT } = this, postCT = CT, postW = 0;
+        for (let { n, ats, body } of cases) {
+            if (!bH)
+                this.CT = new Context(CT);
+            let ES = ass(this, { ws, rt }).SS(), cond, not = F, patt, p;
+            try {
+                switch (n.tagName) {
+                    case 'IF':
+                    case 'THEN':
+                    case 'WHEN':
+                        cond = this.CAttExp(ats, 'cond');
+                        not = ats.gB('not');
+                        patt = dV && ((p = ats.g('match') ?? ats.g('pattern')) != N
+                            ? this.CPatt(p)
+                            : (p = ats.g('urlmatch')) != N
+                                ? this.CPatt(p, T)
+                                : (p = ats.g('regmatch') || ats.g('regexp')) != N
+                                    ? { RE: new RegExp(p, 'i'),
+                                        lvars: this.LVars(ats.g('captures'))
+                                    }
+                                    : N);
+                        patt?.lvars.length && (bH || not)
+                            && thro(`'match' can't be combined with 'hiding' or 'not'`);
+                    case 'ELSE':
+                        aList.push({
+                            cond, not, patt,
+                            b: await this.CIncl(n, ats, F, body) || dB,
+                            n
+                        });
+                        ats.None();
+                        postW = Math.max(postW, this.ws);
+                        postCT = postCT.max(this.CT);
+                }
+            }
+            catch (m) {
+                throw bI ? m : ErrM(n, m);
+            }
+            finally {
+                ES();
+            }
+        }
+        this.ws = !bE && ws > postW ? ws : postW;
+        this.CT = postCT;
+        return aList.length && async function CASE(a, bR) {
+            let val = dV?.(), RRE, cAlt;
+            try {
+                for (var alt of aList)
+                    if (!((!alt.cond || alt.cond())
+                        && (!alt.patt || val != N && (RRE = alt.patt.RE.exec(val)))) == alt.not) {
+                        cAlt = alt;
+                        break;
+                    }
+            }
+            catch (m) {
+                throw alt.n == srcE ? m : ErrM(alt.n, m);
+            }
+            finally {
+                if (bH) {
+                    for (let alt of aList) {
+                        let { r, sub, cr } = PrepElm(a, 'WHEN');
+                        if (!(r.n.hidden = alt != cAlt) && !bR
+                            || cr)
+                            await alt.b(sub);
+                    }
+                }
+                else {
+                    let { sub, cr } = PrepRng(a, srcE, Q, 1, cAlt);
+                    if (cAlt) {
+                        if (RRE)
+                            RRE.shift(),
+                                SetLVs(cAlt.patt.lvars, cAlt.patt.url ? RRE.map(decodeURIComponent) : RRE);
+                        if (cr || !bR)
+                            await cAlt.b(sub);
+                    }
+                }
+            }
+        };
+    }
+    CFor(srcE, ats) {
+        let letNm = ats.g('let'), ixNm = ats.g('index', F, F, T);
+        this.rt = F;
+        if (letNm != N) {
+            let dOf = this.CAttExp(ats, 'of', T), pvNm = ats.g('previous', F, F, T), nxNm = ats.g('next', F, F, T), dUpd = this.CAttExp(ats, 'updates', F, F), bRe = gRe(ats) || dUpd;
+            return this.Framed(async (SF) => {
+                let vLet = this.LV(letNm), vIx = this.LV(ixNm), vPv = this.LV(pvNm), vNx = this.LV(nxNm), dKey = this.CAttExp(ats, 'key'), dHash = this.CAttExps(ats, 'hash'), b = await this.CIter(srcE.childNodes);
+                return b && async function FOR(a) {
+                    let iter = dOf() || E, { r, sub } = PrepRng(a, srcE, Q), sEnv = { env, oes }, u = r.u = r.u + 1 || 0;
+                    ;
+                    if (iter instanceof Promise)
+                        iter.then(it => AJ(() => r.u == u && updFor(it)), sEnv.oes.e);
+                    else
+                        await updFor(iter);
+                    async function updFor(iter) {
+                        ({ env, oes } = sEnv);
+                        let si = Symbol.iterator in iter
+                            || (Symbol.asyncIterator in iter ? arChk()
+                                : thro(`[of] Value (${iter}) is not iterable`)), kMap = r.v || (r.v = new Map), nMap = new Map, ix = 0, { EF } = SF(N, {});
+                        try {
+                            if (si)
+                                for (let i of iter)
+                                    ci(i);
+                            else
+                                for await (let i of iter)
+                                    ci(i);
+                            function ci(it) {
+                                vLet(it);
+                                vIx(ix);
+                                let hash = dHash?.(), key = dKey?.() ?? hash?.[0];
+                                key != N && nMap.has(key)
+                                    && thro(`Duplicate key '${key}'`);
+                                nMap.set(key ?? {}, { it, key, hash, ix: ix++ });
+                            }
+                        }
+                        finally {
+                            EF();
+                        }
+                        arChk();
+                        let L = nMap.size, x, { PN } = sub, bfor = sub.bfor !== U ? sub.bfor : r.Nxt, nR = r.cR, bf, iter2 = nMap.values(), nxIR = iter2.next(), prIt, pR, k, EC = () => {
+                            while (nR && !nMap.has(k = nR.key)) {
+                                if (k != N)
+                                    kMap.delete(k);
+                                nR.erase(PN);
+                                if (nR.rv)
+                                    nR.rv.$subr.delete(nR);
+                                nR.pv = N;
+                                nR = nR.nx;
+                            }
+                            bf = nR?.FstOrNxt || bfor;
+                        };
+                        sub.PR = r;
+                        while (!nxIR.done) {
+                            EC();
+                            let { it, key, hash, ix } = nxIR.value, fr = kMap.get(key), cr = !fr, chA;
+                            if (cr) {
+                                sub.r = N;
+                                sub.pR = pR;
+                                sub.bfor = bf;
+                                ({ r: fr, sub: chA } = PrepRng(sub));
+                                if (key != N)
+                                    kMap.set(key, fr);
+                                fr.key = key;
+                            }
+                            else {
+                                while (nR != fr) {
+                                    if (!fr.mov) {
+                                        if ((x = nMap.get(nR.key).ix - ix)
+                                            * x > L) {
+                                            nR.mov = T;
+                                            nR = nR.nx;
+                                            EC();
+                                            continue;
+                                        }
+                                        fr.pv.nx = fr.nx;
+                                        if (fr.nx)
+                                            fr.nx.pv = fr.pv;
+                                    }
+                                    for (let n of fr.Nodes())
+                                        PN.insertBefore(n, bf);
+                                    fr.mov = F;
+                                    fr.nx = nR;
+                                    break;
+                                }
+                                nR = fr.nx;
+                                sub.r = fr;
+                                chA = PrepRng(sub).sub;
+                                sub.PR = N;
+                            }
+                            fr.pv = pR;
+                            fr.text = `${letNm}(${ix})`;
+                            if (pR)
+                                pR.nx = fr;
+                            else
+                                r.cR = fr;
+                            pR = fr;
+                            nxIR = iter2.next();
+                            let { sub: iSub, EF } = SF(chA, fr), rv = fr.rv;
+                            try {
+                                if (ixNm)
+                                    vIx(fr.ix || (fr.ix = new RV(ixNm))).V = ix;
+                                if (bRe)
+                                    if (cr)
+                                        vLet(fr.rv = RVAR(U, it, N, N, N, dUpd?.()));
+                                    else
+                                        vLet(rv).$V = it;
+                                else
+                                    vLet(it);
+                                vPv(prIt);
+                                vNx(nxIR.value?.item);
+                                if (cr || !hash || hash.some((h, i) => h != fr.hash[i]))
+                                    rv
+                                        && !dUpd
+                                        ? rv.U
+                                        : await b(iSub);
+                            }
+                            finally {
+                                EF();
+                            }
+                            fr.hash = hash;
+                            prIt = it;
+                        }
+                        EC();
+                        if (pR)
+                            pR.nx = N;
+                        else
+                            r.cR = N;
+                    }
+                    ;
+                };
+            });
+        }
+        else {
+            let nm = tU(ats.g('of', T, T)), { S, dC } = this.CT.getCS(nm) ||
+                thro(`Missing attribute [let]`);
+            return this.Framed(async (SF) => {
+                let vIx = this.LV(ixNm), DC = this.LCons([S]), b = await this.CChilds(srcE);
+                return b && async function FOREACH_Slot(a) {
+                    let { tmps, env } = dC(), { EF, sub } = SF(a), i = 0;
+                    try {
+                        for (let slotBldr of tmps) {
+                            vIx(i++);
+                            DC([
+                                { nm, tmps: [slotBldr], env }
+                            ]);
+                            await b(sub);
+                        }
+                    }
+                    finally {
+                        EF();
+                    }
+                };
+            });
+        }
+    }
+    async CComp(srcE, ats) {
+        let bRec = ats.gB('recursive'), { hd, ws } = this, eStyles = ats.gB('encapsulate')
+            && (this.hd = D.createDocumentFragment()).children, arr = Array.from(srcE.children), eSig = arr.shift() || thro('Missing signature(s)'), eTem = arr.pop(), t = /^TEMPLATE(S)?$/.exec(eTem?.tagName) || thro('Missing template(s)'), sigs = [], CDefs = [];
+        for (let elm of /^SIGNATURES?$/.test(eSig.tagName)
+            ? eSig.children
+            : [eSig])
+            sigs.push(new Signat(elm, this));
+        try {
+            var DC = bRec && this.LCons(sigs), ES = this.SS(), b = this.ErrH(await this.CIter(arr), srcE, T)
+                || dB, mapS = new Map(map(sigs, S => [S.nm, S]));
+            for (let [nm, elm, body] of t[1]
+                ? map(eTem.children, elm => [elm.tagName, elm, elm])
+                : [
+                    [sigs[0].nm, eTem, eTem.content]
+                ]) {
+                CDefs.push({
+                    nm,
+                    tmps: [await this.CTempl(mapS.get(nm) || thro(`Template <${nm}> has no signature`), elm, F, U, body, eStyles)]
+                });
+                mapS.delete(nm);
+            }
+            for (let [nm] of mapS)
+                throw `Signature <${nm}> has no template`;
+        }
+        finally {
+            ES();
+            ass(this, { head: hd, ws });
+        }
+        DC || (DC = this.LCons(sigs));
+        return async function COMP(a) {
+            DC(CDefs.map(C => ({ ...C, env })));
+            await b(a);
+        };
+    }
+    CTempl(S, srcE, bSlot, ats, body = srcE, eStyles) {
+        return this.Framed(async (SF) => {
+            this.ws = this.rt = 1;
+            let atts = ats || new Atts(srcE), lvars = S.Pams.map(({ mode, nm }) => {
+                let lnm = atts.g(nm) ?? atts.g(mode + nm);
+                return [nm, this.LV(lnm || (lnm === Q || !bSlot ? nm : N))];
+            }), DC = this.LCons(S.Slots.values()), b = await this.CIter(body.childNodes);
+            ats || atts.None();
+            return b && async function TEMPL(args, mSlots, env, a) {
+                if (!a.r)
+                    for (let { nm, pDf } of S.Pams)
+                        if (pDf && args[nm] === U)
+                            args[nm] = pDf();
+                ro = F;
+                let { sub, EF } = SF(a);
+                for (let [nm, lv] of lvars)
+                    lv(args[nm]);
+                DC(map(S.Slots.keys(), nm => ({ nm,
+                    tmps: mSlots.get(nm) || E,
+                    env
+                })));
+                if (eStyles) {
+                    let { r: { n }, sub: s, cr } = PrepElm(sub, /^[A-Z].*-/.test(S.nm) ? S.nm : 'RHTML-' + S.nm), SR = s.PN = n.shadowRoot || n.attachShadow({ mode: 'open' });
+                    if (cr)
+                        for (let sn of eStyles)
+                            SR.appendChild(sn.cloneNode(T));
+                    sub = s;
+                }
+                try {
+                    await b(sub);
+                }
+                finally {
+                    EF();
+                }
+                ;
+            };
+        }).catch(m => thro(`<${S.nm}> template: ` + m));
+    }
+    async CInst(srcE, ats, { S, dC }) {
+        await S.task;
+        let { RP, CSlot, Slots } = S, gArgs = [], SBldrs = new Map(map(Slots, ([nm]) => [nm, []]));
+        for (let { mode, nm, rq } of S.Pams)
+            if (nm != RP) {
+                let { G, S } = this.cAny(ats, nm, rq);
+                mode == '@' && !S && (S = K(F));
+                if (G)
+                    gArgs.push({ nm, G, S });
+            }
+        let slotE, slot, nm;
+        for (let n of Array.from(srcE.children))
+            if ((slot = Slots.get(nm = (slotE = n).tagName))
+                && slot != CSlot) {
+                SBldrs.get(nm).push(await this.CTempl(slot, slotE, T));
+                srcE.removeChild(n);
+            }
+        CSlot &&
+            SBldrs.get(CSlot.nm).push(await this.CTempl(CSlot, srcE, T, ats));
+        if (RP) {
+            let { af } = this.CAtts(ats, T);
+            ro = T;
+            gArgs.push({
+                nm: RP,
+                G: () => ({ ms: af, xs: af.map(evM) })
+            });
+            ro = F;
+        }
+        this.ws = 3;
+        return async function INST(a, bR) {
+            let { r, sub, cr } = PrepRng(a, srcE), sEnv = env, cdef = dC(), args = r.args || (r.args = Object.create(N));
+            if (cdef)
+                try {
+                    ro = T;
+                    for (let { nm, G, S } of gArgs) {
+                        let v = G();
+                        if (!S
+                            || v instanceof RV) {
+                            bR && (bR = v == args[nm]);
+                            args[nm] = v;
+                        }
+                        else if (cr)
+                            args[nm] = RVAR(U, v, U, S());
+                        else
+                            args[nm].V = v;
+                    }
+                    arChk();
+                    env = cdef.env;
+                    if (cr || !bR)
+                        for (let tmpl of cdef.tmps)
+                            await tmpl?.(args, SBldrs, sEnv, sub);
+                }
+                finally {
+                    env = sEnv;
+                    ro = F;
+                }
+        };
+    }
+    async CHTML(srcE, ats, dTag) {
+        let nm = dTag ? N : srcE.tagName.replace(/\.+$/, Q), preW = this.ws, postW, m;
+        if (this.sPRE.has(nm) || /^.re/.test(srcE.style.whiteSpace)) {
+            this.ws = 4;
+            postW = 1;
+        }
+        else if (m = rBlock.exec(nm)) {
+            this.ws = this.rt = 1;
+            postW = m[2] ? 3 : 1;
+        }
+        if (preW == 4)
+            postW = preW;
+        let { bf, af } = this.CAtts(ats, nm == 'SELECT'), b = await this.CChilds(srcE), { lscl, ndcl } = this;
+        if (postW)
+            this.ws = postW;
+        if (nm == 'A' && this.S.bAutoReroute && bf.every(({ nm }) => nm != 'click'))
+            af.push({ mt: 11, d: dU, cu: 1 });
+        bf.length || (bf = U);
+        af.length || (af = U);
+        return async function ELM(a, bR) {
+            let { r, sub, cr } = PrepElm(a, nm || dTag()), k = bf && ApplyAtts(r, cr, bf), xs = (ro = af)?.map(evM);
+            ro = F;
+            if (cr) {
+                for (let nm of lscl)
+                    r.n.classList.add(nm);
+                for (let i = 0; i < ndcl; i++)
+                    r.n.classList.add(env.cl[i]);
+            }
+            if (cr || !bR)
+                await b?.(sub);
+            af && ApplyAtts(r, cr, af, k, xs);
+        };
+    }
+    CAtts(ats, bAf) {
+        let bf = [], af = [], k = 0, m, ap = this.S.bAutoPointer, addM = (mt, nm, d, cu, ev) => {
+            let M = { mt, nm, d,
+                cu: cu ||
+                    (d.fx != N ? 1 : 3),
+                ev
+            };
+            if (ap && mt == 7)
+                M.ap = nm == 'click';
+            if (mt == 6)
+                M.fp = this.fp;
+            (mt >= 9 || bAf ? af : bf).push(M);
+            k++;
+            return M;
+        };
+        for (let [A, V] of ats)
+            if (m = /^(?:(([#+.](#)?)?(((class|classname)|style)(?:[.:](\w+))?|on(\w+)\.*|(src(set)?)|(\w*)\.*))|([\*\+#!]+|@@?)(\w*)|\.\.\.(\w+))$/.exec(A)) {
+                let [, o, p, h, d, y, c, i, e, s, ss, a, t, w, r] = m;
+                if (o) {
+                    let dV = p || c && i ? this.CExpr(V, A)
+                        : e ? this.CHandlr(V, A)
+                            : this.CText(V, A), aa;
+                    if (aa =
+                        a == 'shown' ? 'hidden'
+                            : a == 'enabled' ? 'disabled' : N) {
+                        a = aa;
+                        dV = B((b) => !b, dV);
+                    }
+                    if (a == 'visible') {
+                        i = 'visibility';
+                        dV = B((b) => b ? N : 'hidden', dV);
+                    }
+                    addM(c ? 3
+                        : i ? 2
+                            : y ? 4
+                                : e ? 7
+                                    : s ? 6
+                                        : p ? d ? 1 : 5
+                                            : 0, i || a || e || d, i && c
+                        ? () => Object.fromEntries([[i, dV()]])
+                        : dV, (e && !p || h) && 1, ss);
+                }
+                else if (t) {
+                    let mP = /[@#](#)?/.exec(t), mT = /([@!])(\1)?/.exec(t), cu = /\*/.test(t)
+                        + /\+/.test(t) * 2, { G, S } = this.cTwoWay(V, w, mT || cu);
+                    (mP ? addM(1, w, G, mP[1] && 1) : {})
+                        .T =
+                        mT && addM(8, w, S, 1, mT[2] ? 'change' : 'input');
+                    cu && addM(10, w, S, cu);
+                }
+                else
+                    V ? thro('A rest parameter cannot have a value')
+                        : addM(9, A, this.CT.getLV(r));
+                ats.delete(A);
+            }
+        return { bf, af };
+    }
+    CText(text, nm) {
+        let bDR = this.S[bD] ? 1 : 0, rI = rIS[bDR] || (rIS[bDR] = new RegExp(`\\\\([{}])|\\$${bDR ? Q : '?'}\\{(${rE})(?:::(${rE})|:\\s*(.*?)\\s*)?\\}|$`, 'g')), gens = [], ws = nm || this.S.bKeepWhiteSpace ? 4 : this.ws, fx = Q, iT = T;
+        rI.lastIndex = 0;
+        while (T) {
+            let lastIx = rI.lastIndex, m = rI.exec(text), [a, x, e, f, ff] = m;
+            fx += text.slice(lastIx, m.index) + (x || Q);
+            if (!a || e) {
+                if (ws < 4) {
+                    fx = fx.replace(/[ \t\n\r]+/g, " ");
+                    if (ws <= 2 && !gens.length)
+                        fx = fx.replace(/^ /, Q);
+                    if (this.rt && !a)
+                        fx = fx.replace(/ $/, Q);
+                }
+                fx && gens.push(fx);
+                if (!a)
+                    return iT ? ass(() => fx, { fx })
+                        : () => {
+                            let s = Q, x;
+                            for (let g of gens)
+                                s += typeof g == 'string' ? g : (x = g.d(), (g.f != N ? RFormat(x, g.f()) : x?.toString()) ?? Q);
+                            return s;
+                        };
+                gens.push({
+                    d: this.CExpr(e, nm, U, '{}'),
+                    f: f ? this.CExpr(f) : ff != N ? K(ff) : U
+                });
+                iT = fx = Q;
+            }
+        }
+    }
+    CPatt(patt, url) {
+        let reg = Q, lvars = [], rP = /\{((?:[^}]|\\\})*)\}|(\?)|(\*)|\[\^?(?:\\[^]|[^\\\]])*\]|$/g;
+        while (rP.lastIndex < patt.length) {
+            let ix = rP.lastIndex, m = rP.exec(patt), lits = patt.slice(ix, m.index);
+            reg +=
+                lits.replace(/\W/g, s => '\\' + s)
+                    + (m[1] != N ? (lvars.push(this.LV(m[1])), '(.*?)')
+                        : m[2] ? '.'
+                            : m[3] ? '.*'
+                                : m[0]);
+        }
+        return { lvars, RE: new RegExp(`^${reg}$`, 'i'), url };
+    }
+    CExpr(e, nm, src = e, dl = '""', bD = T) {
+        if (e == N)
+            return e;
+        e.trim() || thro(nm + `: Empty expression`);
+        var m = '\nat ' + (nm ? `${nm}=` : Q) + dl[0] + Abbr(src) + dl[1], f = TryV(`${US}(function(${this.gsc(e)}){return(${e}\n)})`, m, Q);
+        return () => {
+            try {
+                let x = f.call(PN, env);
+                return bD ? dr(x) : x;
+            }
+            catch (e) {
+                throw e + m;
+            }
+        };
+    }
+    CAttExps(ats, attNm) {
+        let L = ats.g(attNm, F, T);
+        if (L == N)
+            return N;
+        return this.CExpr(`[${L}\n]`, attNm);
+    }
+    CAttExp(ats, at, bReq, bD = T) {
+        return this.CExpr(ats.g(at, bReq, T), '#' + at, U, U, bD);
+    }
+    CPam(ats, at, bReq, bD = T) {
+        let txt = ats.g(at);
+        return (txt == N ? this.CAttExp(ats, at, bReq, bD)
+            : /^on/.test(at) ? this.CHandlr(txt, at)
+                : this.CText(txt, at));
+    }
+    cAny(ats, nm, rq) {
+        let a = '@' + nm, exp = ats.g(a);
+        return exp != N ? this.cTwoWay(exp, a)
+            : { G: this.CPam(ats, nm, rq, F) };
+    }
+    cTwoWay(exp, nm, bT = T) {
+        return {
+            G: this.CExpr(exp, nm, U, U, F),
+            S: bT && this.CRout(`(${exp}\n)=$`, '$', `\nin assigment target "${exp}"`)
+        };
+    }
+    CHandlr(txt, nm) {
+        return /^#/.test(nm) ?
+            this.CExpr(txt, nm, txt)
+            : this.CRout(txt, 'event', `\nat ${nm}="${Abbr(txt)}"`);
+    }
+    CRout(txt, x, i) {
+        let ct = this.gsc(txt), C = TryV(`${US}(function(${x},${ct}){${txt}\n})`, i, Q);
+        return (e = env) => function ($) {
+            try {
+                return C.call(this, $, e);
+            }
+            catch (m) {
+                throw m + i;
+            }
+        };
+    }
+    gsc(exp) {
+        let { ct, lvM, d } = this.CT, n = d + 1, S = new Set, k;
+        for (let [id] of exp.matchAll(/\b[A-Z_$][A-Z0-9_$]*\b/gi))
+            if (k = lvM.get(id)) {
+                if (k.d < n)
+                    n = k.d;
+                S.add(id);
+            }
+        if (n > d)
+            return Q;
+        let p = d - n, q = p;
+        while (n--)
+            q = ct.indexOf(']', q) + 1;
+        return `[${ct.slice(0, p)}${ct.slice(q).replace(new RegExp(`\\b(${[...S].join('|')})\\b|[^\\],]+`, 'g'), '$1')}]`;
+    }
+    gURL(src) {
+        return new URL(src, this.fp).href;
+    }
+    AddC(txt, nm, src) {
+        return `/* From ${src || this.src} */\n` + (nm ? txt.replaceAll(/{(?:{.*?}|.)*?}|@[msd].*?{|@[^{;]*|(?:\w*\|)?(\w|[-.#:()\u00A0-\uFFFF]|\[(?:(['"])(?:\\.|.)*?\2|.)*?\]|\\[0-9A-F]+\w*|\\.|(['"])(?:\\.|.)*?\3)+/gsi, (m, p) => p ? `${m}.${nm}` : m)
+            : txt);
+    }
+    async FetchT(src) {
+        return (await RFetch(this.gURL(src), { headers: this.S.headers })).text();
+    }
+    async fetchM(src) {
+        let m = this.doc.getElementById(src), M = 'MODULE';
+        if (!m) {
+            let { head, body } = P.parseFromString(await this.FetchT(src).catch(e => thro(e + `\nin '${this.src}'`)), 'text/html'), e = body.firstElementChild;
+            if (e?.tagName != M)
+                return [...head.childNodes, ...body.childNodes];
+            m = e;
+        }
+        else if (m.tagName != M)
+            throw `'${src}' must be a <${M}>`;
+        return m.childNodes;
+    }
+}
+class Atts extends Map {
+    constructor(elm) {
+        super();
+        this.elm = elm;
+        for (let a of elm.attributes)
+            if (!/^_/.test(a.name))
+                super.set(a.name, a.value);
+    }
+    g(nm, bReq, bHash, bI) {
+        let m, gg = (nm) => super.get(m = nm), v = gg(nm) ?? (bHash ? gg('#' + nm) : N);
+        if (v != N)
+            super.delete(m);
+        else if (bReq)
+            throw `Missing attribute '${nm}'`;
+        return bI && v == Q ? nm : v;
+    }
+    src(bR, m = 'src') {
+        let v = this.g(m, bR);
+        return v && EC.CText(v, m)();
+    }
+    gB(nm, df = F) {
+        let v = this.g(nm);
+        return v == N ? df
+            : !(/^((false|no)|true|yes)?$/i.exec(v) || thro(`@${nm}: invalid value`))[2];
+    }
+    None() {
+        super.delete('hidden');
+        if (this.size)
+            throw `Unknown attribute(s): ` + Array.from(super.keys()).join(',');
+    }
+}
+const dU = _ => U, dB = a => { PrepRng(a); }, rBlock = /^(BODY|BLOCKQUOTE|D[DLT]|DIV|FORM|H\d|HR|LI|[OU]L|P|TABLE|T[RHD]|PRE|(BUTTON|INPUT|IMG|SELECT|TEXTAREA))$/, Cnms = { __proto__: N }, addS = (S, A) => ({
+    ...S,
+    ...isS(A) ? TryV(`({${A}})`, 'settings') : A,
+    dN: A ? {} : S.dN
+}), ChkNm = (obj, nm) => {
+    let c = Cnms[nm], r;
+    if (!c) {
+        c = nm;
+        if (!(nm in obj)) {
+            r = new RegExp(`^${nm}$`, 'i');
+            for (let p in obj)
+                if (r.test(p)) {
+                    c = p;
+                    break;
+                }
+        }
+        Cnms[nm] = c;
+    }
+    return c;
+}, Abbr = (s, m = 100) => s.length > m ?
+    s.slice(0, m - 3) + "..."
+    : s, SetLVs = (vars, data) => vars.forEach((v, i) => v(data[i])), mapNm = (m, o) => m.set(o.nm, o), mapSet = (m, nm, v) => v != N ? m.set(nm, v) : m.delete(nm), ErrM = (elm, e = Q, maxL) => e + `\nat ${Abbr(elm.outerHTML, maxL)}`, crErrN = (m) => ass(D.createElement('div'), { style: 'color:crimson;font-family:sans-serif;font-size:10pt;white-space: pre;',
+    innerText: m }), NoChilds = (srcE, cn = srcE.childNodes) => {
+    for (let n of cn)
+        if (n.nodeType == 1
+            || n.nodeType == 3
+                && n.nodeValue.trim())
+            throw `<${srcE.tagName} ...> has unwanted content`;
+}, EC = new RComp, ScH = () => L.hash && setTimeout((_ => D.getElementById(L.hash.slice(1))?.scrollIntoView()), 6), gRe = (ats) => ats.gB('reacting') || ats.gB('reactive');
+function* map(I, f, c) {
+    for (let x of I)
+        if (!c || c(x))
+            yield f(x);
+}
+function* split(s) {
+    if (s)
+        for (let v of s.split(','))
+            yield v.trim();
+}
+export function range(from, count, step = 1) {
+    if (count === U) {
+        count = from;
+        from = 0;
+    }
+    return (function* (f, c, s) {
+        while (c--) {
+            yield f;
+            f += s;
+        }
+    })(Number(from), Number(count), Number(step));
+}
+export async function RFetch(req, init) {
+    try {
+        let rp = await fetch(req, init);
+        rp.ok || thro(`Status ${rp.status} ${rp.statusText}`);
+        return rp;
+    }
+    catch (e) {
+        throw `${init?.method || 'GET'} ${req}: ` + e;
+    }
+}
+const fmt = new Intl.DateTimeFormat('nl', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3, hour12: false }), reg1 = /(?<dd>0?(?<d>\d+))-(?<MM>0?(?<M>\d+))-(?<yyyy>2.(?<yy>..))\D+(?<HH>0?(?<H>\d+)):(?<mm>0?(?<m>\d+)):(?<ss>0?(?<s>\d+)),(?<fff>(?<ff>(?<f>.).).)/g;
+export function RFormat(x, f) {
+    switch (typeof f) {
+        case 'string':
+            switch (typeof x) {
+                case 'number':
+                    let d = oes.t.dN, FM = d[f];
+                    if (!FM) {
+                        let m = /^([CDFXN]?)(\d*)(\.(\d*)(-(\d*))?)?$/.exec(tU(f)) || thro(`Invalid number format '${f}'`), n = pI(m[2]), p = pI(m[4]), q = pI(m[6]) ?? p, o = { ...oes.t };
+                        switch (m[1]) {
+                            case 'D':
+                                n ?? (n = 1);
+                                q = p ?? (p = 0);
+                                break;
+                            case 'C':
+                                o.style = 'currency';
+                                o.useGrouping = T;
+                                q = p = n;
+                                n = N;
+                                break;
+                            case 'N':
+                                o.useGrouping = T;
+                            case 'F':
+                                q = p = n ?? 2;
+                                n = 1;
+                                break;
+                            case 'X': FM = { format(x) {
+                                    let s = tU(x.toString(16)), l = s.length;
+                                    return n > l ? '0'.repeat(n - l) + s : s;
+                                } };
+                        }
+                        if (n != N)
+                            o.minimumIntegerDigits = n;
+                        if (p != N)
+                            o.minimumFractionDigits = p;
+                        if (q != N)
+                            o.maximumFractionDigits = q;
+                        d[f] = FM || (FM = new Intl.NumberFormat(o.locale, o));
+                    }
+                    return FM.format(x);
+                case 'object':
+                    return x instanceof Date ?
+                        fmt.format(x).replace(reg1, (f || "yyyy-MM-dd HH:mm:ss").replace(/\\(.)|(yy|[MdHms])\2{0,1}|f{1,3}/g, (m, a) => a || `$<${m}>`))
+                        : x?.toString(f);
+                case 'boolean':
+                    return f.split(';')[x ? 0 : 1];
+                case 'string':
+                    let w = pI(f), L = Math.abs(w) - x.length, S = L > 0 ? ' '.repeat(L) : Q;
+                    return w > 0 ? S + x : x + S;
+            }
+            break;
+        case 'object':
+            return f.format(x);
+        case 'function':
+            return f(x);
+    }
+}
+class DL extends RV {
+    constructor() {
+        super('docLocation', new URL(L.href));
+        this.basepath = U;
+        EL(W, 'popstate', _ => this.U.href = L.href);
+        this.Subscribe(url => {
+            url.href == L.href || history.pushState(N, N, url.href);
+            ScH();
+        });
+        this.query = new Proxy(this, {
+            get: (dl, key) => dl.SP.get(key),
+            set(dl, key, val) {
+                if (val != dl.SP.get(key)) {
+                    mapSet(dl.SP, key, val);
+                    dl.SetDirty();
+                }
+                return T;
+            }
+        });
+    }
+    get subpath() { return dL.pathname.slice(this.basepath.length); }
+    set subpath(s) { dL.pathname = this.basepath + s; }
+    get SP() { return this.V.searchParams; }
+    search(key, val) {
+        let U = new URL(this.V);
+        mapSet(U.searchParams, key, val);
+        return U.href;
+    }
+    RVAR(key, df, nm = key) {
+        let g = () => this.query[key], rv = RVAR(nm, Q, N, v => this.query[key] = v);
+        this.Subscribe(_ => rv.V = g() ?? df, T, T);
+        return rv;
+    }
+}
+const dL = new Proxy(new DL, ProxH), vp = RVAR('viewport', visualViewport);
+vp.onresize = vp.onscroll = _ => vp.SetDirty();
+export const docLocation = dL, viewport = vp, reroute = (h) => {
+    if (typeof h == 'object') {
+        if (h.ctrlKey)
+            return;
+        h.preventDefault();
+        h = h.currentTarget.href;
+    }
+    dL.V = new URL(h, L.href);
+};
+let _ur = import.meta.url, R;
+if (G._ur)
+    alert(`OtoReact loaded twice,\nfrom: ${G._ur}\nand: ${_ur}`), thro();
+ass(G, {
+    RVAR, range, reroute, RFetch, DoUpdate, docLocation,
+    debug: V('()=>{debugger}'),
+    _ur
+});
+export async function RCompile(srcN, setts) {
+    if (srcN.isConnected && !srcN.b)
+        try {
+            srcN.b = T;
+            let s = addS({}, setts), m = L.href.match(`^.*(${s?.basePattern || '/'})`), C = new RComp(N, L.origin + (dL.basepath = m ? new URL(m[0]).pathname : Q), s);
+            await C.Compile(srcN);
+            srcN.innerHTML = Q;
+            for (let a of srcN.attributes)
+                a.value = Q;
+            await C.Build({
+                PN: srcN.parentElement,
+                srcN,
+                bfor: srcN.nextSibling
+            });
+            ScH();
+            srcN.hidden = F;
+        }
+        catch (e) {
+            alert('OtoReact compile error: ' + Abbr(e, 1000));
+        }
+}
+export async function DoUpdate() {
+    if (Jobs.size && !env) {
+        env = E;
+        nodeCnt = 0;
+        let u0 = upd;
+        start = now();
+        while (Jobs.size) {
+            let J = Jobs, C = new WeakSet, check = async (r) => {
+                if (r && !C.has(r)) {
+                    await check(r.PR);
+                    if (J.has(r) && r.n !== U)
+                        await r.update();
+                    C.add(r);
+                }
+                ;
+            };
+            Jobs = new Set;
+            if (upd++ > u0 + 25) {
+                alert('Infinite react-loop');
+                break;
+            }
+            for (let j of J)
+                await (j instanceof Range ? check(j) : j());
+        }
+        if (nodeCnt)
+            R?.log(`Updated ${nodeCnt} nodes in ${(now() - start).toFixed(1)} ms`);
+        env = U;
+    }
+    hUpd = N;
+}
+EL(W, 'pagehide', _ => chWins.forEach(w => w.close()));
+setTimeout(_ => D.querySelectorAll('*[rhtml]')
+    .forEach(src => RCompile(src, src.getAttribute('rhtml'))), 1);

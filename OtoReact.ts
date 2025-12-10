@@ -3100,7 +3100,7 @@ class RComp {
                 let [,o,p,h,d,y,c,i,e,s,ss,a,t,w,r] = m;
                 if (o) {
                     // One-way attributes/properties/handlers
-                    let dV = p ? this.CExpr(V, A)
+                    let dV = p || c && i ? this.CExpr(V, A)
                             : e ? this.CHandlr(V, A)
                             : this.CText(V, A)
                     ,   aa: string
