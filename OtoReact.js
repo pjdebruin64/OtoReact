@@ -1,4 +1,4 @@
-const N = null, T = !0, F = !T, U = void 0, Q = '', E = [], G = self, W = window, D = document, L = location, US = "'use strict';", bD = "bDollarRequired", ass = Object.assign, P = new DOMParser, K = x => () => x, B = (f, g) => x => f(g(x)), now = () => performance.now(), thro = (e) => { throw e; }, V = eval, TryV = (e, m = e, s = '\nin ') => {
+const N = null, T = !0, F = !T, U = void 0, Q = '', E = [], G = self, W = window, D = document, L = location, vp = visualViewport, US = "'use strict';", bD = "bDollarRequired", ass = Object.assign, P = new DOMParser, K = x => () => x, B = (f, g) => x => f(g(x)), now = () => performance.now(), thro = (e) => { throw e; }, V = eval, TryV = (e, m = e, s = '\nin ') => {
     try {
         return V(e);
     }
@@ -11,7 +11,8 @@ const N = null, T = !0, F = !T, U = void 0, Q = '', E = [], G = self, W = window
     preformatted: E,
     version: 1,
     currency: 'EUR',
-    useGrouping: F
+    useGrouping: F,
+    dateFormat: 'yyyy-MM-dd HH:mm:ss'
 }, dr = (v) => v instanceof RV ? v.V : v, rE = ((F) => F(F(F('[^]*?'))))((r) => `(?:\\{(?:\\{${r}\\}|[^])*?\\}\
 |'(?:\\\\.|[^])*?'\
 |"(?:\\\\.|[^])*?"\
@@ -245,6 +246,16 @@ export class RV {
             else
                 this.V = t;
         };
+        this.$ex = () => {
+            for (let s of this.$subs)
+                try {
+                    s(this.$V);
+                }
+                catch (e) {
+                    console.log(e = 'ERROR: ' + Abbr(e, 1000));
+                    alert(e);
+                }
+        };
         this.$name = n;
         if (t instanceof Promise)
             this.Set(t);
@@ -304,23 +315,14 @@ export class RV {
     set U(t) { this.$V = t; this.SetDirty(); }
     SetDirty(prev) {
         this.$imm?.forEach(s => s(this.$V, prev));
-        this.$subr.forEach(AJ);
         if (this.$subs)
-            AJ(this.ex || (this.ex = async () => {
-                for (let s of this.$subs)
-                    try {
-                        s(this.$V);
-                    }
-                    catch (e) {
-                        console.log(e = 'ERROR: ' + Abbr(e, 1000));
-                        alert(e);
-                    }
-            }));
+            AJ(this.$ex);
+        this.$subr.forEach(AJ);
     }
     valueOf() { return this.V?.valueOf(); }
     toString() { return this.V?.toString() ?? Q; }
 }
-const ProxH = {
+const PH = {
     get(rv, p) {
         if (p in rv)
             return rv[p];
@@ -354,8 +356,8 @@ export function RVAR(nm, val, store, imm, storeNm, updTo) {
     store &&
         rv.Subscribe(v => store.setItem(sNm, JSON.stringify(v ?? N)));
     updTo &&
-        rv.Subscribe(() => updTo.SetDirty(), T);
-    rv = new Proxy(rv, ProxH);
+        rv.Subscribe(_ => updTo.SetDirty(), T);
+    rv = new Proxy(rv, PH);
     if (nm)
         G[nm] = rv;
     return rv;
@@ -375,7 +377,7 @@ const AR = (rv, bA) => arV
     return prom.finally(() => start += now() - t);
 }, AJ = (job) => {
     Jobs.add(job);
-    hUpd || (hUpd = setTimeout(DoUpdate, 1));
+    hUpd || (hUpd = setTimeout(DoUpdate, 2));
 };
 let evM = (M) => {
     let v = M.d();
@@ -812,7 +814,7 @@ class RComp {
                         bl = async function RHTML(a) {
                             let { r } = PrepElm(a, 'r-html'), src = S();
                             if (src != r.src) {
-                                let sv = env, C = new RComp(N, dL.href, s), sh = C.hd = r.n.shadowRoot || r.n.attachShadow({ mode: 'open' }), PR = r.rR || (r.rR = new Range(N, N, tag)), tmp = D.createElement(tag);
+                                let sv = env, C = new RComp(N, dL.href, s), sr = C.hd = r.n.shadowRoot || r.n.attachShadow({ mode: 'open' }), PR = r.rR || (r.rR = new Range(N, N, tag)), tmp = D.createElement(tag);
                                 PR.eN?.remove();
                                 (C.doc = D.createDocumentFragment()).appendChild(tmp);
                                 try {
@@ -823,12 +825,13 @@ class RComp {
                                         onc && onc()(U);
                                     }
                                     finally {
-                                        PR.erase(sh);
+                                        PR.erase(sr);
+                                        sr.innerHTML = Q;
                                     }
-                                    await C.Build({ PN: sh, PR });
+                                    await C.Build({ PN: sr, PR });
                                 }
                                 catch (e) {
-                                    PR.eN = sh.appendChild(crErrN(e));
+                                    PR.eN = sr.appendChild(crErrN(e));
                                 }
                                 finally {
                                     env = sv;
@@ -958,7 +961,7 @@ class RComp {
                         break;
                     case 'ATTRIBUTE':
                         NoChilds(srcE);
-                        let dN = RC.CPam(ats, 'name', T), dV = RC.CPam(ats, 'value', T);
+                        let dN = RC.CPam(ats, 'name', T), dV = RC.CPam(ats, 'value') ?? K(Q);
                         bl = function ATTRIB(a) {
                             let { r, cr } = PrepRng(a, srcE), nm = dN();
                             if (cr)
@@ -1270,7 +1273,7 @@ class RComp {
         let letNm = ats.g('let'), ixNm = ats.g('index', F, F, T);
         this.rt = F;
         if (letNm != N) {
-            let dOf = this.CAttExp(ats, 'of', T), pvNm = ats.g('previous', F, F, T), nxNm = ats.g('next', F, F, T), dUpd = this.CAttExp(ats, 'updates', F, F), bRe = gRe(ats) || dUpd;
+            let dOf = this.CAttExp(ats, 'of', T), pvNm = ats.g('previous', F, F, T), nxNm = ats.g('next', F, F, T), dUpd = this.CAttExp(ats, 'updates', F, F), bRe = ats.gB('reacting') || ats.gB('reactive') || dUpd;
             return this.Framed(async (SF) => {
                 let vLet = this.LV(letNm), vIx = this.LV(ixNm), vPv = this.LV(pvNm), vNx = this.LV(nxNm), dKey = this.CAttExp(ats, 'key'), dHash = this.CAttExps(ats, 'hash'), b = await this.CIter(srcE.childNodes);
                 return b && async function FOR(a) {
@@ -1642,33 +1645,33 @@ class RComp {
         return { bf, af };
     }
     CText(text, nm) {
-        let bDR = this.S[bD] ? 1 : 0, rI = rIS[bDR] || (rIS[bDR] = new RegExp(`\\\\([{}])|\\$${bDR ? Q : '?'}\\{(${rE})(?:::(${rE})|:\\s*(.*?)\\s*)?\\}|$`, 'g')), gens = [], ws = nm || this.S.bKeepWhiteSpace ? 4 : this.ws, fx = Q, iT = T;
+        let bDR = this.S[bD] ? 1 : 0, rI = rIS[bDR] || (rIS[bDR] = new RegExp(`\\\\([{}])|\\$${bDR ? Q : '?'}\\{(${rE})(?:::(${rE})|:\\s*(.*?)\\s*)?\\}|$`, 'g')), gens = [], ws = nm || this.S.bKeepWhiteSpace ? 4 : this.ws, s = Q, iT = T;
         rI.lastIndex = 0;
         while (T) {
             let lastIx = rI.lastIndex, m = rI.exec(text), [a, x, e, f, ff] = m;
-            fx += text.slice(lastIx, m.index) + (x || Q);
+            s += text.slice(lastIx, m.index) + (x || Q);
             if (!a || e) {
                 if (ws < 4) {
-                    fx = fx.replace(/[ \t\n\r]+/g, " ");
+                    s = s.replace(/[ \t\n\r]+/g, " ");
                     if (ws <= 2 && !gens.length)
-                        fx = fx.replace(/^ /, Q);
+                        s = s.replace(/^ /, Q);
                     if (this.rt && !a)
-                        fx = fx.replace(/ $/, Q);
+                        s = s.replace(/ $/, Q);
                 }
-                fx && gens.push(fx);
+                s && gens.push({ s });
                 if (!a)
-                    return iT ? ass(() => fx, { fx })
+                    return iT ? ass(() => s, { fx: s })
                         : () => {
-                            let s = Q, x;
+                            let r = Q, x;
                             for (let g of gens)
-                                s += typeof g == 'string' ? g : (x = g.d(), (g.f != N ? RFormat(x, g.f()) : x?.toString()) ?? Q);
-                            return s;
+                                r += g.s ?? (x = g.d(), (g.f ? RFormat(x, g.f()) : x?.toString()) ?? Q);
+                            return r;
                         };
                 gens.push({
                     d: this.CExpr(e, nm, U, '{}'),
                     f: f ? this.CExpr(f) : ff != N ? K(ff) : U
                 });
-                iT = fx = Q;
+                iT = s = Q;
             }
         }
     }
@@ -1839,7 +1842,7 @@ const dU = _ => U, dB = a => { PrepRng(a); }, rBlock = /^(BODY|BLOCKQUOTE|D[DLT]
             || n.nodeType == 3
                 && n.nodeValue.trim())
             throw `<${srcE.tagName} ...> has unwanted content`;
-}, EC = new RComp, ScH = () => L.hash && setTimeout((_ => D.getElementById(L.hash.slice(1))?.scrollIntoView()), 6), gRe = (ats) => ats.gB('reacting') || ats.gB('reactive');
+}, EC = new RComp, ScH = () => L.hash && setTimeout((_ => D.getElementById(L.hash.slice(1))?.scrollIntoView()), 6);
 function* map(I, f, c) {
     for (let x of I)
         if (!c || c(x))
@@ -1933,25 +1936,27 @@ class DL extends RV {
     constructor() {
         super('docLocation', new URL(L.href));
         this.basepath = U;
-        EL(W, 'popstate', _ => this.U.href = L.href);
-        this.Subscribe(url => {
-            url.href == L.href || history.pushState(N, N, url.href);
-            ScH();
-        });
-        this.query = new Proxy(this, {
-            get: (dl, key) => dl.SP.get(key),
-            set(dl, key, val) {
-                if (val != dl.SP.get(key)) {
-                    mapSet(dl.SP, key, val);
-                    dl.SetDirty();
+        this.query = new Proxy(L, {
+            get: (_, key) => dL.searchParams.get(key),
+            set(_, key, val) {
+                if (val != dL.searchParams.get(key)) {
+                    mapSet(dL.searchParams, key, val);
+                    dL.SetDirty();
                 }
                 return T;
             }
         });
+        EL(W, 'popstate', _ => this.U.href = L.href);
+        this.Subscribe(url => {
+            (url instanceof URL || thro('docLocation can only be set to a URL object'));
+            url.href == L.href || history.pushState(N, N, url.href);
+            ScH();
+        });
     }
     get subpath() { return dL.pathname.slice(this.basepath.length); }
     set subpath(s) { dL.pathname = this.basepath + s; }
-    get SP() { return this.V.searchParams; }
+    get fragment() { return dL.hash ? decodeURIComponent(L.hash.substring(1)) : N; }
+    set fragment(f) { dL.hash = f != N ? '#' + encodeURIComponent(f) : Q; }
     search(key, val) {
         let U = new URL(this.V);
         mapSet(U.searchParams, key, val);
@@ -1963,9 +1968,8 @@ class DL extends RV {
         return rv;
     }
 }
-const dL = new Proxy(new DL, ProxH), vp = RVAR('viewport', visualViewport);
-vp.onresize = vp.onscroll = _ => vp.SetDirty();
-export const docLocation = dL, viewport = vp, reroute = (h) => {
+let _ur = import.meta.url, R, dL = new Proxy(new DL, PH);
+export const docLocation = dL, viewport = RVAR('viewport', vp), reroute = (h) => {
     if (typeof h == 'object') {
         if (h.ctrlKey)
             return;
@@ -1974,12 +1978,12 @@ export const docLocation = dL, viewport = vp, reroute = (h) => {
     }
     dL.V = new URL(h, L.href);
 };
-let _ur = import.meta.url, R;
+vp.onresize = vp.onscroll = _ => viewport.SetDirty();
 if (G._ur)
     alert(`OtoReact loaded twice,\nfrom: ${G._ur}\nand: ${_ur}`), thro();
 ass(G, {
     RVAR, range, reroute, RFetch, DoUpdate, docLocation,
-    debug: V('()=>{debugger}'),
+    debug: V('_=>{debugger}'),
     _ur
 });
 export async function RCompile(srcN, setts) {
@@ -2010,9 +2014,13 @@ export async function DoUpdate() {
         let u0 = upd;
         start = now();
         while (Jobs.size) {
-            let J = Jobs, C = new WeakSet, check = async (r) => {
+            if (upd++ > u0 + 25) {
+                alert('Infinite react-loop');
+                break;
+            }
+            let J = Jobs, C = new WeakSet, chk = async (r) => {
                 if (r && !C.has(r)) {
-                    await check(r.PR);
+                    await chk(r.PR);
                     if (J.has(r) && r.n !== U)
                         await r.update();
                     C.add(r);
@@ -2020,12 +2028,8 @@ export async function DoUpdate() {
                 ;
             };
             Jobs = new Set;
-            if (upd++ > u0 + 25) {
-                alert('Infinite react-loop');
-                break;
-            }
             for (let j of J)
-                await (j instanceof Range ? check(j) : j());
+                await (j instanceof Range ? chk(j) : j());
         }
         if (nodeCnt)
             R?.log(`Updated ${nodeCnt} nodes in ${(now() - start).toFixed(1)} ms`);

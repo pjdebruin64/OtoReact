@@ -11,16 +11,24 @@ type Settings = Partial<{
     bDollarRequired: boolean;
     bKeepWhiteSpace: boolean;
     bKeepComments: boolean;
-    preformatted: string[];
+    preformatted: readonly string[];
     storePrefix: string;
     version: number;
     headers: HeadersInit;
     locale: string;
     currency: string;
     useGrouping: boolean;
+    numberFormat: Format<number>;
+    dateFormat: Format<Date>;
+    booleanFormat: Format<boolean>;
     bSubf: boolean | 2;
     dN: {
         [f: string]: Intl.NumberFormat;
+    };
+    dF: {
+        date: Format<Date>;
+        number: Format<number>;
+        boolean: Format<boolean>;
     };
 }>;
 type Environment = [Environment?, ...unknown[]] & {
@@ -49,8 +57,8 @@ declare class Range<NodeType extends ChildNode = ChildNode> {
     Nodes(): Generator<ChildNode>;
     bD?: () => void;
     aD?: () => void;
-    rvars?: Set<RV>;
-    erase(par: falsy | Node): void;
+    rvars?: Set<RV<any>>;
+    erase(par?: falsy | Node): void;
     uInfo?: {
         b: DOMBuilder;
         env: Environment;
@@ -73,7 +81,6 @@ export declare class RV<T = unknown> {
     private $imm;
     $subs: Set<Subscriber<T>>;
     $subr: Set<Range<ChildNode>>;
-    $upd: () => void;
     get V(): T;
     set V(v: T);
     Subscribe(s: Subscriber<T>, bImm?: boolean, cr?: boolean): this;
@@ -84,13 +91,13 @@ export declare class RV<T = unknown> {
     get Clear(): () => void;
     get U(): T;
     set U(t: T);
+    private $ex;
     SetDirty(prev?: T): void;
-    private ex;
     valueOf(): Object;
     toString(): string;
 }
 export type RVAR<T = any> = T extends [any] ? RV<T> & T : RV<T> & T;
-export declare function RVAR<T>(nm?: string, val?: T | Promise<T> | (() => T | Promise<T>), store?: Store, imm?: Subscriber<T>, storeNm?: string, updTo?: RV): RVAR<T>;
+export declare function RVAR<T>(nm?: string, val?: T | Promise<T> | (() => T | Promise<T>), store?: Store, imm?: Subscriber<T>, storeNm?: string, updTo?: RV<any>): RVAR<T>;
 type Subscriber<T = unknown> = ((t?: T, prev?: T) => unknown);
 type OES = {
     e: EventListener;
@@ -106,20 +113,22 @@ export declare function RFetch(req: RequestInfo, init?: RequestInit): Promise<Re
 type Format<T = any> = string | ((x: T) => string) | {
     format: (x: T) => string;
 };
-export declare function RFormat<T = any>(x: T, f: Format<T>): any;
+export declare function RFormat<T = any>(x: T, f: Format<T>): string;
 declare class DL extends RV<URL> {
-    query: {
-        [fld: string]: string;
-    };
     constructor();
     basepath: string;
     get subpath(): string;
     set subpath(s: string);
-    get SP(): URLSearchParams;
+    query: {
+        [fld: string]: string;
+    };
+    get fragment(): string;
+    set fragment(f: string);
     search(key: string, val: string): string;
     RVAR(key: string, df?: string, nm?: string): RV<string> & string;
 }
-export declare const docLocation: DL & URL, viewport: RV<VisualViewport> & VisualViewport, reroute: (h: MouseEvent | string) => void;
+type DocLocation = DL & URL;
+export declare const docLocation: DocLocation, viewport: RV<VisualViewport> & VisualViewport, reroute: (h: MouseEvent | string) => void;
 export declare function RCompile(srcN: HTMLElement & {
     b?: booly;
 }, setts?: string | Settings): Promise<void>;

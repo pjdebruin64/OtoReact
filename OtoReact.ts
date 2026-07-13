@@ -10,11 +10,12 @@ const
 ,   F = <false>!T
 ,   U = <undefined> void 0
 ,   Q = ''
-,   E = []                          // Empty array, must remain empty
+,   E = [] as const                 // Empty array, must remain empty
 ,   G = <typeof globalThis>self     // = globalThis
 ,   W = window
 ,   D = document
-,   L = location    
+,   L = location  
+,   vp = visualViewport  
 ,   US = "'use strict';"
 ,   bD = "bDollarRequired"
 ,   ass = Object.assign as <T extends {}>(obj: T, props: {}) => T
@@ -23,11 +24,11 @@ const
 // Some utilities
 //,   I   = x => x
 ,   K   = x => () => x
-,   B   = (f, g) => x => f(g(x))
+,   B   = (f: any, g: any) => x => f(g(x))
 
 ,   now = () => performance.now()
     // Throwing an error from within an expression
-,   thro= (e?: any) => {throw e}
+,   thro= (e?: string|Error) => {throw e}
     // The eval function.
 ,   V  = eval
     // Note that calling 'V(txt)' triggers an INDIRECT eval, so that variables from this file cannot be accessed,
@@ -58,11 +59,12 @@ const
         // The default basepattern is defined in RCompile.
         //basePattern:    '/',
         bAutoPointer:   T,
-        preformatted:   E as string[],
+        preformatted:   E,
         //storePrefix:    "RVAR_",
         version:        1,
         currency:       'EUR',
-        useGrouping: F
+        useGrouping:    F,
+        dateFormat:     'yyyy-MM-dd HH:mm:ss'
     }
     // Dereference if RVAR
 ,   dr  = (v: unknown) => v instanceof RV ? v.V : v
@@ -97,7 +99,7 @@ type Settings = Partial<{
     bDollarRequired: boolean,
     bKeepWhiteSpace: boolean,
     bKeepComments:  boolean,
-    preformatted:   string[],
+    preformatted:   readonly string[],
     storePrefix:    string,
     version:        number,
     headers:        HeadersInit,    // E.g. [['Cache-Control','no-cache']]
@@ -105,9 +107,14 @@ type Settings = Partial<{
     currency:       string,
     useGrouping:    boolean,
 
+    numberFormat:   Format<number>,
+    dateFormat:     Format<Date>,
+    booleanFormat:  Format<boolean>,
+
     // For internal use
     bSubf:          boolean|2,          // Subfile yes or no. 2 is used for RHTML.
     dN:             { [f:string]: Intl.NumberFormat },  // NumberFormat cache for the current settings
+    dF:             {date: Format<Date>, number: Format<number>, boolean: Format<boolean>}
 }>;
 
 // A  DEPENDENT value of type T in a given context is a routine computing a T, using the current global environment 'env' that should match that context
@@ -228,7 +235,7 @@ type Area<RT extends object = {}, T extends true = true> = {
     pR?: Range;        // Or the next sibling of this previous range
 }
 
-/* An 'AreaR' is an Area 'a' where 'a.r' is a 'Range' or 'null', not just 'true' */
+/* An 'AreaR' is an Area 'a' where 'a.r' is a 'Range' or 'null', never 'true' */
 type AreaR<RT extends object = {}> = Area<RT, never>;
 
 /* A RANGE object describe a (possibly empty) range of constructed DOM nodes, in relation to the source RHTML.
@@ -303,7 +310,7 @@ class Range<NodeType extends ChildNode = ChildNode>{
     // Enumerate all DOM nodes within this range, not including their children
     Nodes(): Generator<ChildNode> { 
         // 'Nodes' is a recursive enumerator, that we apply to 'this'
-        return (function* Nodes(r: Range) {
+        return (function* Nodes(r: Range): Generator<ChildNode> {
             let c: Range;
             if (r.n)
                 yield r.n;
@@ -318,7 +325,7 @@ class Range<NodeType extends ChildNode = ChildNode>{
     aD?: () => void;   // After destroy handler
 
     // For reactive elements
-    rvars?: Set<RV>;         // RVARs on which the element reacts
+    rvars?: Set<RV<any>>;         // RVARs on which the element reacts
 
     // Erase the range, i.e., destroy all child ranges, remove all nodes, unsubscribe from all RVARs, and call all before- and after-destroy handlers.
     // The range itself remains a child of its parent range.
@@ -615,8 +622,6 @@ export class RV<T = unknown> {
     // Subscribed ranges
     public $subr = new Set<Range>;
 
-    public $upd: () => void;
-
     // Use var.V to get or set its value
     get V(): T {
         // Mark as used
@@ -690,21 +695,23 @@ export class RV<T = unknown> {
     }
     set U(t: T) { this.$V = t; this.SetDirty(); }
 
-    public SetDirty(prev?: T) {
-        this.$imm?.forEach(s => s(this.$V, prev));
-
-        this.$subr.forEach(AJ);
-        if (this.$subs)
-            AJ(this.ex ||= async () => {
-                for (let s of this.$subs)
-                    try { s(this.$V); }
-            catch (e) {    
+    private $ex = () => {
+        for (let s of this.$subs)
+            try { s(this.$V); }
+            catch (e: any) {    
                 console.log(e = 'ERROR: ' + Abbr(e,1000));
                 alert(e);
             }
-            });
     }
-    private ex: Job;
+
+    public SetDirty(prev?: T) {
+        this.$imm?.forEach(s => s(this.$V, prev));
+
+        if (this.$subs)
+            AJ(this.$ex);
+
+        this.$subr.forEach(AJ);
+    }
 
     valueOf()  { return this.V?.valueOf(); }
     toString() { return this.V?.toString() ?? Q; }
@@ -722,31 +729,31 @@ export type RVAR<T = any> = // RV<T> & T
         ;
 
 const
-    // ProxH is the proxyhandler on RV objects rv, that channels all property access either
+    // PH is the proxyhandler on RV objects rv, that channels all property access either
     // to rv itself or to rv.V / rv.U.
     // Used by the RVAR function and also for the docLocation object.
-    ProxH: ProxyHandler<RV<object>> = 
+    PH: ProxyHandler<RV<object>> = 
     {
-        get(rv: RV, p) {
-            if (p in rv) return rv[p];
+        get(rv: RV<object>, p) {
+            if (p in rv) return (rv as any)[p];
 
             let ob = rv.V
-            ,   v = ob?.[p]
+            ,   v = (ob as any)?.[p as string | symbol]
             ;
             // When the value is a method, bind it to the object, not to the proxy           
             return v instanceof Function ? v.bind(ob) : v;
         },
 
-        set(rv: RV, p, v) {
+        set(rv: RV<object>, p, v) {
             if (p in rv)
-                rv[p] = v;
-            else if (v !== rv.$V[p])
-                rv.U[p] = v;
+                (rv as any)[p] = v;
+            else if (v !== (rv.$V as any)[p])
+                (rv.U as any)[p] = v;
             return T
         },
 
         deleteProperty(rv, p) {
-            return p in rv.$V ? delete rv.U[p] : T;
+            return p in (rv.$V as any) ? delete (rv.U as any)[p] : T;
         },
 
         has(rv, p) {
@@ -764,7 +771,7 @@ export function RVAR<T>(
 ,   store?: Store
 ,   imm?: Subscriber<T>
 ,   storeNm?: string
-,   updTo?: RV
+,   updTo?: RV<any>
 ): RVAR<T> {
 
     if (store) {
@@ -783,15 +790,15 @@ export function RVAR<T>(
         );
 
     updTo &&      
-        rv.Subscribe(()=>updTo.SetDirty(),T);
+        rv.Subscribe(_ => updTo.SetDirty(),T);
     
     // When val is some object (null included) or undefined
     //if (/^[uo]/.test(typeof val))
         // Then make rv a Proxy
-        rv = new Proxy<RV<T>>( rv, <ProxyHandler<RV<T>>>ProxH );
+        rv = new Proxy<RV<T>>( rv, <ProxyHandler<RV<T>>><any>PH );
     
     if (nm) 
-        G[nm] = rv;
+        (G as any)[nm] = rv;
 
     return rv as RVAR<T>;
 }
@@ -841,7 +848,7 @@ let env: Environment       // Current runtime environment
 const
     // Routine to add an RVAR to the collection
     // bA truthy means a full tree update is required
-    AR = (rv: RV, bA?: booly) => 
+    AR = (rv: RV<any>, bA?: booly) => 
         arV
         && (bA || !arV.has(rv))
         && arV.set(rv, bA)
@@ -875,7 +882,7 @@ const
 }
 ,   AJ = (job: Job) => {
     Jobs.add(job);
-    hUpd ||= setTimeout(DoUpdate, 1);
+    hUpd ||= setTimeout(DoUpdate, 2);
 }
 //#endregion
 
@@ -935,11 +942,11 @@ class Hndlr implements EventListenerObject {
         this.oes = oes;
     }
 
-    handleEvent(ev: Event, ...r: any[]) {
+    handleEvent(ev: Event, ...r: unknown[]) {
             if (this.h)
                 try {
                     var {e,s} = this.oes
-                    ,   v = this.h.call(ev?.currentTarget, ev, ...r);
+                    ,   v = <any>this.h.call(ev?.currentTarget, ev, ...<[]>r);
                     // Mimic return value treatment of 'onevent' attribute/property
                     v === false && ev.preventDefault();
 
@@ -949,17 +956,21 @@ class Hndlr implements EventListenerObject {
                         // Otherwise call an onsuccess handler
                         : s?.(ev);
                 }
-                catch (er) {
+                catch (er: any) {
                     // Call onerror handler or retrow the error
                     (e || thro)(er);
                 } 
     }
 }
+// Event target, that:
 class Targ implements EventListenerObject {
+    // - Has a name nm
     constructor(public nm?: string) {}
-
+    // - properly cased name
     c?: string;
+    // The handling routine
     S?: (v: unknown) => void;
+    
     handleEvent(ev: Event) {
         this.S(ev.currentTarget[this.c ||= ChkNm(ev.currentTarget, this.nm)]);
     }
@@ -1579,9 +1590,7 @@ class RComp {
                                 try {
                                     v = G?.();
                                 }
-                                finally { 
-                                    ro = F; 
-                                }
+                                finally { ro = F; }
 
                                 if (rv) {
                                     if (onM) 
@@ -1730,7 +1739,8 @@ class RComp {
                                         //L.origin + dL.basepath
                                         dL.href
                                     , s)
-                                ,   sh = C.hd = r.n.shadowRoot || r.n.attachShadow({mode: 'open'})
+                                // Shadowroot
+                                ,   sr = C.hd = r.n.shadowRoot || r.n.attachShadow({mode: 'open'})
                                 ,   PR = r.rR ||= new Range(N, N, tag) as Range & {eN?: ChildNode}
                                 ,   tmp = D.createElement(tag)
                                     ;
@@ -1754,14 +1764,15 @@ class RComp {
                                     }
                                     finally {
                                         // Remove previous content
-                                        PR.erase(sh);
+                                        PR.erase(sr);
+                                        sr.innerHTML=Q; // Needed for run-time error messages
                                     }
                                     
                                     // Building
-                                    await C.Build({ PN: sh, PR });
+                                    await C.Build({ PN: sr, PR });
                                 }
                                 catch(e) { 
-                                    PR.eN = sh.appendChild(crErrN(e))
+                                    PR.eN = sr.appendChild(crErrN(e))
                                 }
                                 finally { env = sv; }
                             }
@@ -1923,7 +1934,7 @@ class RComp {
                                         // Would we set '.innerText', then <br> would be inserted
                                         r.n.innerHTML = RC.AddC(r.tx = txt, nm);
 
-                                    (env.cl = r.cl ||= [... env.cl||E])[i] = nm;
+                                    (env.cl = r.cl ||= [... env.cl || E])[i] = nm;
                                 }
                                 else
                                     await b(sub);
@@ -1947,7 +1958,7 @@ class RComp {
                     case 'ATTRIBUTE':
                         NoChilds(srcE);
                         let dN = RC.CPam<string>(ats, 'name', T)
-                        ,   dV = RC.CPam<string>(ats, 'value', T);
+                        ,   dV = RC.CPam<string>(ats, 'value') ?? K(Q); // Default is constant empty string
                         bl = function ATTRIB(a: Area){
                             let {r,cr} = PrepRng<{v:string}>(a, srcE)
                             ,   nm = dN();
@@ -2488,7 +2499,7 @@ class RComp {
             ,   pvNm = ats.g('previous',F,F,T)
             ,   nxNm = ats.g('next',F,F,T)
             ,   dUpd = this.CAttExp<RV>(ats, 'updates',F,F)
-            ,   bRe: booly = gRe(ats) || dUpd
+            ,   bRe: booly = ats.gB('reacting') || ats.gB('reactive') || dUpd
                 ;
 
             return this.Framed(async SF => {
@@ -2873,7 +2884,7 @@ class RComp {
                     lv(args[nm]);
 
                 // Define all slot-constructs
-                DC(map(S.Slots.keys()
+                DC( <any>map(S.Slots.keys()
                     , nm => (
                         {   nm
                             , tmps: mSlots.get(nm) || E
@@ -3189,41 +3200,43 @@ class RComp {
                 //   a   x                            e           f            ff                            
                     , 'g'
                 )
-        ,   gens: Array< string | {d:Dep<any>, f: Dep<string>} > = []
+        ,   gens: Array< {s?:string, d?:Dep<any>, f?: Dep<string>} > = []
         ,   ws: WSpc = nm || this.S.bKeepWhiteSpace ? WSpc.preserve : this.ws
-        ,   fx = Q
+        ,   s = Q
         ,   iT: booly = T         // truthy when the text contains no nonempty embedded expressions
         ;
         rI.lastIndex = 0
         while (T) {
             let lastIx = rI.lastIndex, m = rI.exec(text), [a,x,e,f,ff] = m;
             // Add fixed text to 'fx':
-            fx += text.slice(lastIx, m.index) + (x||Q)
+            s += text.slice(lastIx, m.index) + (x||Q)
             // When we are either at the end of the string, or have a nonempty embedded expression:
             if (!a || e) {
                 if (ws < WSpc.preserve) {
                     // Whitespace reduction
-                    fx = fx.replace(/[ \t\n\r]+/g, " ");  // Reduce all whitespace to a single space, except nonbreakable space &nbsp;
+                    s = s.replace(/[ \t\n\r]+/g, " ");  // Reduce all whitespace to a single space, except nonbreakable space &nbsp;
                     if (ws <= WSpc.inlineSpc && !gens.length)
-                        fx = fx.replace(/^ /,Q);     // No initial whitespace
+                        s = s.replace(/^ /,Q);     // No initial whitespace
                     if (this.rt && !a)
-                        fx = fx.replace(/ $/,Q);     // No trailing whitespace
+                        s = s.replace(/ $/,Q);     // No trailing whitespace
                 }
-                fx && gens.push( fx );
+                s && gens.push( {s} );
                 if (!a)
-                    return iT ? ass(() => fx, {fx})
+                    return iT ? ass(() => s, {fx: s})
                         : () => {
-                            let s = Q, x: any;
+                            let r = Q, x: any;
                             for (let g of gens)
-                                s+= typeof g == 'string' ? g : (x = g.d(),(g.f != N ? RFormat(x, g.f()) : x?.toString()) ?? Q)
-                            return s;
+                                // Format g
+                                r+= g.s ?? (x = g.d(),(g.f ? RFormat(x, g.f()) : x?.toString()) ?? Q)
+                            
+                            return r;
                         };
                 
                 gens.push( {
                     d: this.CExpr<string>(e, nm, U, '{}')
                     ,f: f ? this.CExpr(f): ff != N ? K(ff) : U
                 } ); 
-                iT = fx = Q;
+                iT = s = Q;
             }
         }
     }
@@ -3256,12 +3269,13 @@ class RComp {
         return {lvars, RE: new RegExp(`^${reg}$`, 'i'), url}; 
     }
 
+    // Compile an expression
     public CExpr<T>(
         e: string           // Expression to transform into a function
-    ,   nm?: string             // To be inserted in an errormessage
-    ,   src: string = e    // Source expression
+    ,   nm?: string         // Name, to insert in an error message
+    ,   src: string = e     // Source expression, to insert in error message
     ,   dl: string = '""'   // Delimiters to put around the expression when encountering a compiletime or runtime error
-    ,   bD: boolean = T       // Should the result be dereferenced, if it is an RV? Provide 'F' if it should not.
+    ,   bD: boolean = T     // Should the result be dereferenced, if it is an RV? Provide 'F' if it should not.
     ): Dep<T> {
         if (e == N)
             return <null>e;  // when 'e' is either null or undefined, return the same
@@ -3293,9 +3307,17 @@ class RComp {
         ) {
         return this.CExpr<T>(ats.g(at, bReq, T), '#'+at, U,U,bD);
     }
-    private CPam<T = unknown>(ats: Atts, at: string, bReq?: booly, bD:boolean=T): Dep<T> 
+
     // Compile parameter (of some OtoReact construct) 
+    // Returns null when not found and not required.
+    private CPam<T = unknown>(
+        ats: Atts           // Set of attributes
+        , at: string        // Attribute name
+        , bReq?: booly      // Required?
+        , bD:boolean=T      // Dereference?
+    ): Dep<T> 
     {
+        // First check whether [at] is present, then #[at]
         let txt = ats.g(at);
         return (
             txt == N ? this.CAttExp<T>(ats, at, bReq, bD)
@@ -3553,8 +3575,6 @@ const
 // Scroll to hash tag: scroll the element identified by the current location hash into view, after the DOM has been updated
 , ScH = () =>
     L.hash && setTimeout((_ => D.getElementById(L.hash.slice(1))?.scrollIntoView()), 6)
-
-, gRe = (ats: Atts) => ats.gB('reacting') || ats.gB('reactive')
 ;
 
 // Map an iterable to another iterable, for items satisfying an optional condition
@@ -3608,7 +3628,7 @@ const
     { day:'2-digit', month: '2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', second: '2-digit', fractionalSecondDigits:3, hour12:false }),
     reg1 = /(?<dd>0?(?<d>\d+))-(?<MM>0?(?<M>\d+))-(?<yyyy>2.(?<yy>..))\D+(?<HH>0?(?<H>\d+)):(?<mm>0?(?<m>\d+)):(?<ss>0?(?<s>\d+)),(?<fff>(?<ff>(?<f>.).).)/g;
 
-export function RFormat<T = any>(x: T, f: Format<T>) {
+export function RFormat<T = any>(x: T, f: Format<T>): string {
     switch (typeof f) {
         case 'string':
 
@@ -3677,39 +3697,40 @@ export function RFormat<T = any>(x: T, f: Format<T>) {
 //#region Routing
 // docLocation becomes a proxy to an instance of this class DL:
 class DL extends RV<URL>{
-    query: {[fld: string]: string};
     constructor() {
         // Create an RVAR globally named 'docLocation'
         super('docLocation', new URL(L.href));
 
         // Let the RV react on user-triggered browser-URL changes
         EL(W, 'popstate', _ => this.U.href = L.href );
+        
         // Let the browser URL react on RV-changes
         this.Subscribe(url => {
+            (url instanceof URL || thro('docLocation can only be set to a URL object'))
             url.href == L.href || history.pushState(N, N, url.href);    // Change URL withour reloading the page
             ScH(); // Scroll to hash, even when URL remains the same
         });
-
-        this.query = <any>new Proxy<DL>(
-            this, 
-            {
-                get: ( dl: DL, key: string) => dl.SP.get(key),
-                set(dl: DL, key: string, val: string) {
-                    if (val != dl.SP.get(key)) {
-                        mapSet(dl.SP as any, key, val);
-                        dl.SetDirty();
-                    }
-                    return T;
-                }
-            }
-        );
     }
     
     basepath: string = U;
     get subpath()  { return dL.pathname.slice(this.basepath.length); }
     set subpath(s) { dL.pathname = this.basepath + s; }
-
-    get SP() { return this.V.searchParams; }
+    query: {[fld: string]: string}
+        = new Proxy<{}>(
+            L, // irrelevant
+            {
+                get: (_, key: string) => dL.searchParams.get(key),
+                set(_, key: string, val: string) {
+                    if (val != dL.searchParams.get(key)) {
+                        mapSet(dL.searchParams as any, key, val);
+                        dL.SetDirty();
+                    }
+                    return T;
+                }
+            }
+        );
+    get fragment(): string { return dL.hash ? decodeURIComponent(L.hash.substring(1)) : N; }
+    set fragment(f: string) { dL.hash = f!=N ? '#' + encodeURIComponent(f) : Q; }
 
     search(key: string, val: string) {
         let U = new URL(this.V);
@@ -3723,15 +3744,17 @@ class DL extends RV<URL>{
         this.Subscribe(_ => rv.V = g() ?? df, T,T);
         return rv;
     }
-}
 
-const 
-    dL = new Proxy( new DL, ProxH ) as DL & URL
-    , vp = RVAR('viewport', visualViewport);
-vp.onresize = vp.onscroll = _ => vp.SetDirty();
+}
+type DocLocation = DL & URL;
+
+let _ur = import.meta.url   // This is the url otoreact is loaded from
+    , R: RComp
+    , dL = <DocLocation>new Proxy(new DL, PH)
+    ;
 export const
     docLocation = dL
-,   viewport = vp
+,   viewport = RVAR('viewport', vp)
 ,   reroute = 
         (h: MouseEvent | string) => {
             if (typeof h == 'object') {
@@ -3740,18 +3763,19 @@ export const
                 h.preventDefault();
                 h = (h.currentTarget as HTMLAnchorElement).href;
             }
-            dL.V = new URL(h, L.href);
+            dL.V = new URL(h, L.href);  // dL is always set dirty
         };
+
+vp.onresize = vp.onscroll = _ => viewport.SetDirty();
 //#endregion
 
-let _ur = import.meta.url
-,   R: RComp;
+// Check if OtoReact was loaded before
 if (G._ur) alert(`OtoReact loaded twice,\nfrom: ${G._ur}\nand: ${_ur}`),thro();
 
 // Define global constants
 ass(G, {
         RVAR, range, reroute, RFetch, DoUpdate, docLocation
-        , debug: V('()=>{debugger}')
+        , debug: V('_=>{debugger}')
         , _ur
 });
 
@@ -3795,32 +3819,34 @@ export async function RCompile(srcN: HTMLElement & {b?: booly}, setts?: string |
 
 export async function DoUpdate() {
     if (Jobs.size && !env) {
-        env = E;
+        env = <any>E;
         nodeCnt = 0;
         let u0 = upd;
         start = now();
         while (Jobs.size) {
+            if (upd++ > u0 + 25) {
+                alert('Infinite react-loop');
+                break;
+            }
             
             let J = Jobs,
                 C = new WeakSet<Range>,
-                check = async (r:Range) => {
+                
+                // Update this range, when in J, but make sure parent ranges are always updated before their children!
+                chk = async (r:Range) => {
                     if (r && !C.has(r)) {
-                        // Make sure parent ranges are always updated before their children
-                        await check(r.PR);
+                        // First check the chain of parent ranges
+                        await chk(r.PR);
                         if (J.has(r) && r.n !== U)
                             await r.update();
+                        // Mark as done
                         C.add(r);
                     };
                 };
             Jobs = new Set;
 
-            if (upd++ > u0 + 25) {
-                alert('Infinite react-loop');
-                break;
-            }
-
             for (let j of J)
-                await (j instanceof Range ? check(j) : j());
+                await (j instanceof Range ? chk(j) : j());
         }
         if (nodeCnt)
             R?.log(`Updated ${nodeCnt} nodes in ${(now() - start).toFixed(1)} ms`);
