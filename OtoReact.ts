@@ -252,6 +252,7 @@ class Range<NodeType extends ChildNode = ChildNode>{
 
     PR?: Range;       // Parent range
     PN?: false | ParentNode;        // Parent node, only when this range has a DIFFERENT parent node than its parent range
+    eN?: ChildNode;      // Error node
 
     constructor(
         ar: Area             // The constructor puts the new Range into this Area
@@ -331,7 +332,7 @@ class Range<NodeType extends ChildNode = ChildNode>{
     // The range itself remains a child of its parent range.
     // The parent node must be specified, or a falsy value when nodes need not be removed.
     erase(par?: falsy | Node) {
-        let {n, cR} = this, p = !n && par;
+        let {n, cR, eN} = this, p = !n && par;
         this.cR = this.n = N;
         while (cR) {
             // Call a 'beforedestroy' handler
@@ -350,6 +351,7 @@ class Range<NodeType extends ChildNode = ChildNode>{
             cR.n = U;
             cR = cR.nx;
         }
+        eN?.remove();
         if (n && par)
             // Remove the current node, only when 'par' is specified
             par.removeChild(n);
@@ -620,7 +622,7 @@ export class RV<T = unknown> {
     // Deferred subscribers
     public $subs: Set<Subscriber<T>> = U;
     // Subscribed ranges
-    public $subr = new Set<Range>;
+    public $subr = new Set<Job>();
 
     // Use var.V to get or set its value
     get V(): T {
@@ -644,8 +646,20 @@ export class RV<T = unknown> {
         if (s) {
             if (cr)
                 s(this.$V);
-            (bImm ? this.$imm ||= new Set
-                : this.$subs ||= new Set).add(s);
+            (bImm 
+                ? this.$imm ||= new Set
+                : this.$subs 
+                    || (this.$subr.add(
+                        _ => {
+                            for (let s of this.$subs)
+                                try { s(this.$V); }
+                                catch (e: any) {    
+                                    console.log(e = 'ERROR: ' + Abbr(e,1000));
+                                    alert(e);
+                                }
+                            }
+                        ), (this.$subs = new Set))
+            ).add(s);
         }
         return this;
     }
@@ -695,20 +709,8 @@ export class RV<T = unknown> {
     }
     set U(t: T) { this.$V = t; this.SetDirty(); }
 
-    private $ex = () => {
-        for (let s of this.$subs)
-            try { s(this.$V); }
-            catch (e: any) {    
-                console.log(e = 'ERROR: ' + Abbr(e,1000));
-                alert(e);
-            }
-    }
-
     public SetDirty(prev?: T) {
         this.$imm?.forEach(s => s(this.$V, prev));
-
-        if (this.$subs)
-            AJ(this.$ex);
 
         this.$subr.forEach(AJ);
     }
@@ -1729,7 +1731,7 @@ class RComp {
                             ;
                         NoChilds(srcE);
                         bl = async function RHTML(a) {
-                            let {r} = PrepElm<{rR: Range & {eN?: ChildNode}, src: string}>(a, 'r-html')
+                            let {r} = PrepElm<{rR: Range, src: string}>(a, 'r-html')
                             ,   src = S()
                             ;
 
@@ -1741,7 +1743,7 @@ class RComp {
                                     , s)
                                 // Shadowroot
                                 ,   sr = C.hd = r.n.shadowRoot || r.n.attachShadow({mode: 'open'})
-                                ,   PR = r.rR ||= new Range(N, N, tag) as Range & {eN?: ChildNode}
+                                ,   PR = r.rR ||= new Range(N, N, tag) as Range
                                 ,   tmp = D.createElement(tag)
                                     ;
 
@@ -1765,7 +1767,6 @@ class RComp {
                                     finally {
                                         // Remove previous content
                                         PR.erase(sr);
-                                        sr.innerHTML=Q; // Needed for run-time error messages
                                     }
                                     
                                     // Building
@@ -2119,7 +2120,7 @@ class RComp {
         // unless an 'onerror' handler was given or the option 'bShowErrors' was disabled.
         // This routine also handles auto-react checking.
         // srcN is the source node, bA truthy means processing should still be aborted when an error has occured and handled.
-        let bl = b && (async (a: AreaR<{eN: ChildNode; uv:Map<RV, booly>;}>, bR: boolean) => {
+        let bl = b && (async (a: AreaR<{uv:Map<RV, booly>;}>, bR: boolean) => {
             let r = a.r;
             if (r?.eN) {
                 // Remove an earlier error message in the DOM tree at this point
@@ -2156,7 +2157,7 @@ class RComp {
                     this.log(msg);
                     e ? e(msg)
                     : this.S.bShowErrors ?
-                        (r||{} as typeof r).eN = a.PN.insertBefore(crErrN(msg), a.r?.FstOrNxt)
+                        (r||a.PR).eN = a.PN.insertBefore(crErrN(msg), a.r?.FstOrNxt)
                     : U;
                     
                     bA && thro(Q);
@@ -3843,7 +3844,7 @@ export async function DoUpdate() {
                         C.add(r);
                     };
                 };
-            Jobs = new Set;
+            Jobs = new Set<Job>;
 
             for (let j of J)
                 await (j instanceof Range ? chk(j) : j());

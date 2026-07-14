@@ -49,6 +49,7 @@ declare class Range<NodeType extends ChildNode = ChildNode> {
     nx: Range;
     PR?: Range;
     PN?: false | ParentNode;
+    eN?: ChildNode;
     constructor(ar: Area, n: NodeType, text?: string);
     toString(): string;
     get Fst(): ChildNode;
@@ -80,7 +81,7 @@ export declare class RV<T = unknown> {
     constructor(n: string, t?: T | Promise<T> | (() => T | Promise<T>));
     private $imm;
     $subs: Set<Subscriber<T>>;
-    $subr: Set<Range<ChildNode>>;
+    $subr: Set<Job<unknown>>;
     get V(): T;
     set V(v: T);
     Subscribe(s: Subscriber<T>, bImm?: boolean, cr?: boolean): this;
@@ -91,7 +92,6 @@ export declare class RV<T = unknown> {
     get Clear(): () => void;
     get U(): T;
     set U(t: T);
-    private $ex;
     SetDirty(prev?: T): void;
     valueOf(): Object;
     toString(): string;
@@ -99,6 +99,7 @@ export declare class RV<T = unknown> {
 export type RVAR<T = any> = T extends [any] ? RV<T> & T : RV<T> & T;
 export declare function RVAR<T>(nm?: string, val?: T | Promise<T> | (() => T | Promise<T>), store?: Store, imm?: Subscriber<T>, storeNm?: string, updTo?: RV<any>): RVAR<T>;
 type Subscriber<T = unknown> = ((t?: T, prev?: T) => unknown);
+type Job<T = unknown> = Subscriber<T> | Range;
 type OES = {
     e: EventListener;
     s: EventListener;
