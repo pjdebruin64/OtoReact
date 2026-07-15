@@ -21,11 +21,12 @@ const
 ,   ass = Object.assign as <T extends {}>(obj: T, props: {}) => T
 ,   P   = new DOMParser
     
-// Some utilities
+// Some combinators (https://en.wikipedia.org/wiki/Combinatory_logic)
 //,   I   = x => x
 ,   K   = x => () => x
-,   B   = (f: any, g: any) => x => f(g(x))
+,   B   = <T,U,V>(f: (x:U)=>V, g: (x:T)=>U) => (x?:T) => f(g(x))
 
+// Some utilities
 ,   now = () => performance.now()
     // Throwing an error from within an expression
 ,   thro= (e?: string|Error) => {throw e}
@@ -340,7 +341,7 @@ class Range<NodeType extends ChildNode = ChildNode>{
 
             // Remove range cR from any RVAR it is subscribed to
             cR.rvars?.forEach(rv =>
-                rv.$subr.delete(cR));
+                rv.$subs.delete(cR));
 
             // Destroy 'cR'
             cR.erase(cR.PN ?? p);
@@ -594,6 +595,7 @@ export interface Store {
     getItem(key: string): string | null;
     setItem(key: string, value: string): void;
 }
+// RVAR engine, that will be the target of the RVAR proxy
 export class RV<T = unknown> {
     public $name?: string;
     // The value of the variable
@@ -601,17 +603,27 @@ export class RV<T = unknown> {
     private $C: number = 0;
     private $up: number = 0;
 
-    constructor(n: string, t?: T|Promise<T> | (()=> T|Promise<T> ) ) {
+    constructor(
+        // Name
+        n: string,
+
+// Initial value, may be a value or a promise, or a function yielding a value or a promise.
+// In the latter case, the function will be valled to get its value,
+// and a routine that recalculates the RV value will be subscribed to ny RVAR used during the calculation.
+        t?: T | Promise<T> | (()=> T|Promise<T>) 
+    ) {
         this.$name = n;
 
         if (t instanceof Promise)
             this.Set(t);
         else if (t instanceof Function) {
-            let j = () => this.Set(t()), s = arV;
+
+            let j = B(this.Set,t), 
+                s = arV;
             arV = new Map;
             j();
             for (let rv of arV.keys())
-                rv.Subscribe(() => AJ(j));
+                rv.Subscribe(j);
             arV = s;
         }
         else
@@ -620,9 +632,7 @@ export class RV<T = unknown> {
     // Immediate subscribers
     private $imm: Set<Subscriber<T>> = U; // Init is necessary
     // Deferred subscribers
-    public $subs: Set<Subscriber<T>> = U;
-    // Subscribed ranges
-    public $subr = new Set<Job>();
+    public $subs: Set<Job> = new Set<Job>();
 
     // Use var.V to get or set its value
     get V(): T {
@@ -644,40 +654,28 @@ export class RV<T = unknown> {
     // When 'cr' is truthy, it will be called immediately at the moment of subscribing.
     Subscribe(s: Subscriber<T>, bImm?: boolean, cr?: boolean) {
         if (s) {
-            if (cr)
-                s(this.$V);
-            (bImm 
-                ? this.$imm ||= new Set
-                : this.$subs 
-                    || (this.$subr.add(
-                        _ => {
-                            for (let s of this.$subs)
-                                try { s(this.$V); }
-                                catch (e: any) {    
-                                    console.log(e = 'ERROR: ' + Abbr(e,1000));
-                                    alert(e);
-                                }
-                            }
-                        ), (this.$subs = new Set))
-            ).add(s);
+            cr && s(this.$V);
+            bImm
+                ? (this.$imm ||= new Set).add(s)
+                : this.$subs.add(_ => s(this.$V));
         }
         return this;
     }
-    Unsubscribe(s: Subscriber<T>) {
-        this.$imm?.delete(s);
-        this.$subs?.delete(s);
+    Unsubscribe(s: Job<T>) {
+        this.$imm?.delete(s as any);
+        this.$subs.delete(s);
     }
     // Subscribe range
     // bR = true means update just the root node, not the whole tree
     $SR({PN}: Area, b: DOMBuilder, r: Range, bR:boolean = true) {
         // Keep all info needed for the update in r.uInfo
         r.uInfo ||= {b, env, oes, PN, bR};
-        this.$subr.add(r);
+        this.$subs.add(r);
         (r.rvars ||= new Set).add(this);
     }
     // Unsubscribe range
     $UR(r: Range) {
-        this.$subr.delete(r);
+        this.$subs.delete(r);
         r.rvars.delete(this);
     }
     readonly Set: (t:T | Promise<T>) => void
@@ -712,7 +710,7 @@ export class RV<T = unknown> {
     public SetDirty(prev?: T) {
         this.$imm?.forEach(s => s(this.$V, prev));
 
-        this.$subr.forEach(AJ);
+        this.$subs.forEach(AJ);
     }
 
     valueOf()  { return this.V?.valueOf(); }
@@ -794,10 +792,8 @@ export function RVAR<T>(
     updTo &&      
         rv.Subscribe(_ => updTo.SetDirty(),T);
     
-    // When val is some object (null included) or undefined
-    //if (/^[uo]/.test(typeof val))
-        // Then make rv a Proxy
-        rv = new Proxy<RV<T>>( rv, <ProxyHandler<RV<T>>><any>PH );
+    // Make rv a Proxy
+    rv = new Proxy<RV<T>>( rv, <ProxyHandler<RV<T>>><any>PH );
     
     if (nm) 
         (G as any)[nm] = rv;
@@ -2157,7 +2153,7 @@ class RComp {
                     this.log(msg);
                     e ? e(msg)
                     : this.S.bShowErrors ?
-                        (r||a.PR).eN = a.PN.insertBefore(crErrN(msg), a.r?.FstOrNxt)
+                        (r||a.PR||a.pR).eN = a.PN.insertBefore(crErrN(msg), a.r?.FstOrNxt)
                     : U;
                     
                     bA && thro(Q);
@@ -2527,13 +2523,20 @@ class RComp {
                     ;                            
                     if (iter instanceof Promise)
                         // The iteration is a Promise, so we can't execute the FOR just now, and we don't want to wait for it.                        
-                        iter.then(it => AJ(() => r.u == u && updFor(it)) , sEnv.oes.e);
+                        iter.then(
+                            it => AJ(
+                                () => {
+                                    ({env, oes} = sEnv);
+                                    // Do the update, only if no new update has been scheduled for this FOR-loop
+                                    r.u == u && updFor(it)
+                                }
+                            ) 
+                            , sEnv.oes.e
+                        );
                     else
                         await updFor(iter);
 
                     async function updFor(iter: Iterable<Item>) {
-                        ({env, oes} = sEnv);                            
-
                         // Map of the current set of child ranges
                         let 
                             si: booly =
@@ -2596,8 +2599,7 @@ class RComp {
                                     if (k != N)
                                         kMap.delete(k);
                                     nR.erase(PN);
-                                    if (nR.rv)
-                                        nR.rv.$subr.delete(nR);
+                                    nR.rv?.Unsubscribe(nR);
                                     nR.pv = N;
                                     nR = nR.nx;
                                 }
@@ -3831,6 +3833,7 @@ export async function DoUpdate() {
             }
             
             let J = Jobs,
+                // Set of checked ranges
                 C = new WeakSet<Range>,
                 
                 // Update this range, when in J, but make sure parent ranges are always updated before their children!
@@ -3838,6 +3841,7 @@ export async function DoUpdate() {
                     if (r && !C.has(r)) {
                         // First check the chain of parent ranges
                         await chk(r.PR);
+                        // Update if asked for
                         if (J.has(r) && r.n !== U)
                             await r.update();
                         // Mark as done
@@ -3846,8 +3850,13 @@ export async function DoUpdate() {
                 };
             Jobs = new Set<Job>;
 
+            // First all non-Range jobs
             for (let j of J)
-                await (j instanceof Range ? chk(j) : j());
+                await (j instanceof Range || j());
+
+            // Then all Ranges, parents first
+            for (let j of J)
+                await (j instanceof Range && chk(j));
         }
         if (nodeCnt)
             R?.log(`Updated ${nodeCnt} nodes in ${(now() - start).toFixed(1)} ms`);

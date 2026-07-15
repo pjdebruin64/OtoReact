@@ -80,12 +80,11 @@ export declare class RV<T = unknown> {
     private $up;
     constructor(n: string, t?: T | Promise<T> | (() => T | Promise<T>));
     private $imm;
-    $subs: Set<Subscriber<T>>;
-    $subr: Set<Job<unknown>>;
+    $subs: Set<Job>;
     get V(): T;
     set V(v: T);
     Subscribe(s: Subscriber<T>, bImm?: boolean, cr?: boolean): this;
-    Unsubscribe(s: Subscriber<T>): void;
+    Unsubscribe(s: Job<T>): void;
     $SR({ PN }: Area, b: DOMBuilder, r: Range, bR?: boolean): void;
     $UR(r: Range): void;
     readonly Set: (t: T | Promise<T>) => void;

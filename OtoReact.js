@@ -1,4 +1,4 @@
-/* OtoReact version 2026-07-14
+/* OtoReact version 2026-07-15
 * Copyright 2022-2025 Peter J. de Bruin (peter@peterdebruin.net)
 * SEE LICENSE IN README.md or https://otoreact.dev/download
 */
@@ -25,7 +25,7 @@ if(r.n)yield r.n
 else if(c=r.cR)do{yield*Nodes(c)}while(c=c.nx)})(this)}erase(par){let{n,cR,eN}=this,p=!n&&par
 this.cR=this.n=N
 while(cR){cR.bD?.call(cR.n??p)
-cR.rvars?.forEach(rv=>rv.$subr.delete(cR))
+cR.rvars?.forEach(rv=>rv.$subs.delete(cR))
 cR.erase(cR.PN??p)
 cR.aD?.call(cR.n??p)
 cR.n=U
@@ -66,29 +66,28 @@ return c}}}export class RV{constructor(n,t){this.$V=U
 this.$C=0
 this.$up=0
 this.$imm=U
-this.$subs=U
-this.$subr=new Set()
+this.$subs=new Set()
 this.Set=t=>{if(t instanceof Promise){this.V=U
 let c=this.$C
 t.then(v=>this.$C==c&&(this.V=v),oes.e)}else this.V=t}
 this.$name=n
 if(t instanceof Promise)this.Set(t)
-else if(t instanceof Function){let j=()=>this.Set(t()),s=arV
+else if(t instanceof Function){let j=B(this.Set,t),s=arV
 arV=new Map
 j()
-for(let rv of arV.keys())rv.Subscribe(()=>AJ(j))
+for(let rv of arV.keys())rv.Subscribe(j)
 arV=s}else this.$V=t}get V(){AR(this)
 return this.$V}set V(v){this.$C++
 this.$up=upd
 let p=this.$V
 this.$V=v
-v===p||this.SetDirty(p)}Subscribe(s,bImm,cr){if(s){if(cr)s(this.$V);(bImm?this.$imm||(this.$imm=new Set):this.$subs||(this.$subr.add(_=>{for(let s of this.$subs)try{s(this.$V)}catch(e){console.log(e='ERROR: '+Abbr(e,1000))
-alert(e)}}),(this.$subs=new Set))).add(s)}return this}Unsubscribe(s){this.$imm?.delete(s)
-this.$subs?.delete(s)}$SR({PN},b,r,bR=true){r.uInfo||(r.uInfo={b,env,oes,PN,bR})
-this.$subr.add(r);(r.rvars||(r.rvars=new Set)).add(this)}$UR(r){this.$subr.delete(r)
+v===p||this.SetDirty(p)}Subscribe(s,bImm,cr){if(s){cr&&s(this.$V)
+bImm?(this.$imm||(this.$imm=new Set)).add(s):this.$subs.add(_=>s(this.$V))}return this}Unsubscribe(s){this.$imm?.delete(s)
+this.$subs.delete(s)}$SR({PN},b,r,bR=true){r.uInfo||(r.uInfo={b,env,oes,PN,bR})
+this.$subs.add(r);(r.rvars||(r.rvars=new Set)).add(this)}$UR(r){this.$subs.delete(r)
 r.rvars.delete(this)}get Clear(){return()=>{if(upd>this.$up)this.V=U}}get U(){ro?AR(this):this.SetDirty()
 return this.$V}set U(t){this.$V=t;this.SetDirty();}SetDirty(prev){this.$imm?.forEach(s=>s(this.$V,prev))
-this.$subr.forEach(AJ)}valueOf(){return this.V?.valueOf();}toString(){return this.V?.toString()??Q;}}const PH={get(rv,p){if(p in rv)return rv[p]
+this.$subs.forEach(AJ)}valueOf(){return this.V?.valueOf();}toString(){return this.V?.toString()??Q;}}const PH={get(rv,p){if(p in rv)return rv[p]
 let ob=rv.V,v=ob?.[p]
 return v instanceof Function?v.bind(ob):v},set(rv,p,v){if(p in rv)rv[p]=v
 else if(v!==rv.$V[p])rv.U[p]=v
@@ -334,7 +333,7 @@ await prom}catch(m){arChk()
 if(m){let msg=srcN instanceof HTMLElement?ErrM(srcN,m,45):m,e=oes.e
 this.S.bAbortOnError&&thro(msg)
 this.log(msg)
-e?e(msg):this.S.bShowErrors?(r||a.PR).eN=a.PN.insertBefore(crErrN(msg),a.r?.FstOrNxt):U
+e?e(msg):this.S.bShowErrors?(r||a.PR||a.pR).eN=a.PN.insertBefore(crErrN(msg),a.r?.FstOrNxt):U
 bA&&thro(Q)}}PN=a.PN})
 return bl}CIncl(srcE,ats,bR,cn=srcE.childNodes){let src=ats?.src(bR)
 return src?this.Framed(async SF=>{let C=new RComp(this,this.gURL(src),{bSubf:T}),task=srcE.children.length||srcE.textContent.trim()?C.Compile(N,cn):this.fetchM(src).then(cn=>C.Compile(N,cn))
@@ -400,7 +399,7 @@ key!=N&&nMap.has(key)&&thro(`Duplicate key '${key}'`)
 nMap.set(key??{},{it,key,hash,ix:ix++})}}finally{EF()}arChk()
 let L=nMap.size,x,{PN}=sub,bfor=sub.bfor!==U?sub.bfor:r.Nxt,nR=r.cR,bf,iter2=nMap.values(),nxIR=iter2.next(),prIt,pR,k,EC=()=>{while(nR&&!nMap.has(k=nR.key)){if(k!=N)kMap.delete(k)
 nR.erase(PN)
-if(nR.rv)nR.rv.$subr.delete(nR)
+nR.rv?.Unsubscribe(nR)
 nR.pv=N
 nR=nR.nx}bf=nR?.FstOrNxt||bfor}
 sub.PR=r
@@ -609,6 +608,7 @@ break}let J=Jobs,C=new WeakSet,chk=async r=>{if(r&&!C.has(r)){await chk(r.PR)
 if(J.has(r)&&r.n!==U)await r.update()
 C.add(r)}}
 Jobs=new Set
-for(let j of J)await(j instanceof Range?chk(j):j())}if(nodeCnt)R?.log(`Updated ${nodeCnt} nodes in ${(now()-start).toFixed(1)} ms`)
+for(let j of J)await(j instanceof Range||j())
+for(let j of J)await(j instanceof Range&&chk(j))}if(nodeCnt)R?.log(`Updated ${nodeCnt} nodes in ${(now()-start).toFixed(1)} ms`)
 env=U}hUpd=N}EL(W,'pagehide',_=>chWins.forEach(w=>w.close()))
 setTimeout(_=>D.querySelectorAll('*[rhtml]').forEach(src=>RCompile(src,src.getAttribute('rhtml'))),1);
